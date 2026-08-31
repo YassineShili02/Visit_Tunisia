@@ -109,36 +109,31 @@ jobs:
         run: python -c 'from main import app; print("AI import OK")'
 
   # ============================================================
-  # 4. IMAGES DOCKER : construction + push GHCR (optionnel)
+  # 4. IMAGES DOCKER : construction + push Docker Hub (optionnel)
   # ============================================================
   docker-images:
     name: Images Docker
     runs-on: ubuntu-latest
     needs: [backend, frontend, ai]
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
 
-      # Connexion GHCR uniquement si PUSH_IMAGES=true
-      - name: Se connecter a GHCR
+      # Connexion Docker Hub uniquement si PUSH_IMAGES=true
+      - name: Se connecter a Docker Hub
         if: env.PUSH_IMAGES == 'true'
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Construire les images (buildx)
+      - name: Construire les images
         run: docker compose build
 
-      - name: Pusher les images vers GHCR
+      - name: Pusher les images vers Docker Hub
         if: env.PUSH_IMAGES == 'true'
         run: |
-          IMG="ghcr.io/${{ github.repository_owner }}/visit_tunisia"
           for SERVICE in backend frontend ai; do
-            docker tag "visit-tunisia-$SERVICE" "$IMG-$SERVICE:latest"
-            docker tag "visit-tunisia-$SERVICE" "$IMG-$SERVICE:${{ github.sha }}"
-            docker push --all-tags "$IMG-$SERVICE"
+            docker tag "visit-tunisia-$SERVICE" "yassineshili/visit_tunisia_$SERVICE:latest"
+            docker tag "visit-tunisia-$SERVICE" "yassineshili/visit_tunisia_$SERVICE:${{ github.sha }}"
+            docker push --all-tags "yassineshili/visit_tunisia_$SERVICE"
           done
