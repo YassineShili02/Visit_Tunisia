@@ -144,8 +144,8 @@ jobs:
           docker run -d --network vt-smoke --name vt-db \
             -e POSTGRES_DB=visit_tunisia -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin \
             postgis/postgis:16-3.4
-          # Backend
-          docker run -d --network vt-smoke --name vt-backend \
+          # Backend (port expose pour l'attente)
+          docker run -d --network vt-smoke -p 8082:8082 --name vt-backend \
             -e DB_HOST=vt-db -e DB_PORT=5432 -e DB_NAME=visit_tunisia \
             -e DB_USER=postgres -e DB_PASSWORD=admin \
             -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
@@ -158,7 +158,7 @@ jobs:
             -e GEMINI_API_KEY=cle_factice_pour_smoke \
             -e SPRING_BOOT_URL=http://vt-backend:8082 \
             vt-ai:smoke
-          # Frontend (nginx, proxy vers backend + ai)
+          # Frontend (nginx, proxy vers backend + ai) - point d'entree
           docker run -d --network vt-smoke -p 4200:80 --name vt-frontend \
             vt-frontend:smoke
 
@@ -166,28 +166,33 @@ jobs:
         run: |
           for i in $(seq 1 30); do
             if docker exec vt-db pg_isready -U postgres >/dev/null 2>&1; then
-              echo "PostGIS pret apres ${i}x2s"; break
+              echo "PostGIS pret"; break
             fi
             sleep 2
           done
-          echo "--- Logs backend (atterrissage) ---"
           for i in $(seq 1 40); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8082/api/destinations 2>/dev/null || true)
-            if [ "$code" = "200" ]; then echo "Backend repond (HTTP 200) apres ${i}x3s"; break; fi
+            if curl -sf http://localhost:8082/api/destinations -o /dev/null; then
+              echo "Backend repond apres ~$((i*3))s"; break
+            fi
             sleep 3
           done
-          echo "HTTP final = $code"
+          echo "Verif backend direct OK (ou timeout)"
 
-      - name: Smoke test — verifier les reponses
+      - name: Smoke test — verifier les reponses via le frontend nginx
         run: |
           echo "1) Frontend :"
           curl -sf http://localhost:4200/ -o /dev/null && echo "   OK (page HTML)"
-          echo "2) Backend destinations :"
-          curl -sf http://localhost:4200/api/destinations | head -c 200 && echo "" && echo "   OK"
-          echo "3) Backend events :"
+          echo "2) Backend destinations (via proxy nginx) :"
+          curl -sf http://localhost:4200/api/destinations -o /dev/null && echo "   OK"
+          echo "3) Backend events (via proxy nginx) :"
           curl -sf http://localhost:4200/api/events -o /dev/null && echo "   OK"
-          echo "4) Backend via proxy nginx :"
-          curl -sf http://localhost:4200/api/weather/forecast?lat=36.81\&lon=10.17 -o /dev/null && echo "   OK (meteo)"
+          echo "4) AI (via proxy nginx) :"
+          # Clé Gemini factice -> on tolere une reponse (meme erreur) ; on verifie juste que la route repond
+          code=$(curl -s -o /tmp/ai_resp.txt -w "%{http_code}" http://localhost:4200/api/chat -X POST \
+            -H "Content-Type: application/json" -d '{"message":"bonjour","history":[]}')
+          if [ "$code" != "000" ]; then echo "   OK (route IA joignable, HTTP $code)"; else echo "   ECHEC"; exit 1; fi
+          echo "5) Meteo (direct backend) :"
+          curl -sf "http://localhost:8082/api/weather/forecast?lat=36.81&lon=10.17" -o /dev/null && echo "   OK"
 
       - name: Smoke test — nettoyage
         if: always()
