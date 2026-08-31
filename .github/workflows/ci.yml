@@ -1,0 +1,144 @@
+name: CI - Build & Images (sans deploiement)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  # Par defaut : on construit mais on NE pousse PAS les images.
+  # Passer cette variable a "true" (secret/var GitHub) active le push vers GHCR.
+  PUSH_IMAGES: ${{ vars.PUSH_IMAGES || 'false' }}
+
+jobs:
+  # ============================================================
+  # 1. BACKEND : tests + package jar
+  # ============================================================
+  backend:
+    name: Backend (Spring Boot)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: visit_tunisia
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d visit_tunisia"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: visit_tunisia
+      DB_USER: postgres
+      DB_PASSWORD: admin
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+      WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+    defaults:
+      run:
+        working-directory: Visit_Tunisia_Backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Tester avec Maven
+        run: mvn test
+      - name: Empaqueter le jar
+        if: github.event_name == 'push'
+        run: mvn package -DskipTests
+      - name: Uploader le jar (artefact)
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: Visit_Tunisia_Backend/target/Visit_Tunisia-0.0.1-SNAPSHOT.jar
+
+  # ============================================================
+  # 2. FRONTEND : build Angular (production)
+  # ============================================================
+  frontend:
+    name: Frontend (Angular)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Visit_Tunisia_Frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: Visit_Tunisia_Frontend/package-lock.json
+      - name: Installer les dependances
+        run: npm ci
+      - name: Build production
+        run: npm run build
+
+  # ============================================================
+  # 3. AI : install python + verification import
+  # ============================================================
+  ai:
+    name: AI (FastAPI)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Visit_Tunisia_AI
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: Visit_Tunisia_AI/requirements.txt
+      - name: Installer les dependances
+        run: pip install -r requirements.txt
+      - name: Verifier que l'app importe (GEMINI_API_KEY factice)
+        env:
+          GEMINI_API_KEY: cle_factice_pour_test_ci
+        run: python -c "from main import app; print('AI: import OK')"
+
+  # ============================================================
+  # 4. IMAGES DOCKER : construction + push GHCR (optionnel)
+  # ============================================================
+  docker-images:
+    name: Images Docker
+    runs-on: ubuntu-latest
+    needs: [backend, frontend, ai]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Connexion GHCR uniquement si PUSH_IMAGES=true
+      - name: Se connecter a GHCR
+        if: env.PUSH_IMAGES == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construire les images (buildx)
+        run: docker compose build
+
+      - name: Pusher les images vers GHCR
+        if: env.PUSH_IMAGES == 'true'
+        run: |
+          IMG="ghcr.io/${{ github.repository_owner }}/visit_tunisia"
+          for SERVICE in backend frontend ai; do
+            docker tag "visit-tunisia-$SERVICE" "$IMG-$SERVICE:latest"
+            docker tag "visit-tunisia-$SERVICE" "$IMG-$SERVICE:${{ github.sha }}"
+            docker push --all-tags "$IMG-$SERVICE"
+          done
