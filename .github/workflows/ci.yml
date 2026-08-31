@@ -137,13 +137,21 @@ jobs:
       # ============================================================
       # SMOKE TEST : lancer les 4 conteneurs et verifier les reponses
       # ============================================================
-      - name: Smoke test — demarrer les conteneurs
+      - name: Smoke test — demarrer la BDD
         run: |
           docker network create vt-smoke
-          # BDD PostGIS
           docker run -d --network vt-smoke --name vt-db \
             -e POSTGRES_DB=visit_tunisia -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin \
             postgis/postgis:16-3.4
+          for i in $(seq 1 30); do
+            if docker exec vt-db pg_isready -U postgres >/dev/null 2>&1; then
+              echo "PostGIS pret apres ~$((i*2))s"; break
+            fi
+            sleep 2
+          done
+
+      - name: Smoke test — demarrer backend + AI + frontend
+        run: |
           # Backend (port expose pour l'attente)
           docker run -d --network vt-smoke -p 8082:8082 --name vt-backend \
             -e DB_HOST=vt-db -e DB_PORT=5432 -e DB_NAME=visit_tunisia \
@@ -158,18 +166,12 @@ jobs:
             -e GEMINI_API_KEY=cle_factice_pour_smoke \
             -e SPRING_BOOT_URL=http://vt-backend:8082 \
             vt-ai:smoke
-          # Frontend (nginx, proxy vers backend + ai) - point d'entree
+          # Frontend (nginx, proxy vers backend + ai) - demarre en dernier
           docker run -d --network vt-smoke -p 4200:80 --name vt-frontend \
             vt-frontend:smoke
 
       - name: Smoke test — attendre la BDD et le backend
         run: |
-          for i in $(seq 1 30); do
-            if docker exec vt-db pg_isready -U postgres >/dev/null 2>&1; then
-              echo "PostGIS pret"; break
-            fi
-            sleep 2
-          done
           backend_up=""
           for i in $(seq 1 50); do
             if curl -sf http://localhost:8082/api/destinations -o /dev/null; then
