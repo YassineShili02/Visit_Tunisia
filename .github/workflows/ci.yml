@@ -126,14 +126,28 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Construire les images
-        run: docker compose build
-
-      - name: Pusher les images vers Docker Hub
+      - name: Construire et pousser les images vers Docker Hub
         if: env.PUSH_IMAGES == 'true'
         run: |
-          for SERVICE in backend frontend ai; do
-            docker tag "visit-tunisia-$SERVICE" "yassineshili/visit_tunisia_$SERVICE:latest"
-            docker tag "visit-tunisia-$SERVICE" "yassineshili/visit_tunisia_$SERVICE:${{ github.sha }}"
-            docker push --all-tags "yassineshili/visit_tunisia_$SERVICE"
-          done
+          SHA="${{ github.sha }}"
+          # Backend (multi-stage: compile + runtime avec python/scrapers)
+          docker build -t "yassineshili/visit_tunisia_backend:latest" \
+                       -t "yassineshili/visit_tunisia_backend:$SHA" \
+                       Visit_Tunisia_Backend
+          # Frontend (multi-stage: node -> nginx)
+          docker build -t "yassineshili/visit_tunisia_frontend:latest" \
+                       -t "yassineshili/visit_tunisia_frontend:$SHA" \
+                       Visit_Tunisia_Frontend
+          # AI (FastAPI)
+          docker build -t "yassineshili/visit_tunisia_ai:latest" \
+                       -t "yassineshili/visit_tunisia_ai:$SHA" \
+                       Visit_Tunisia_AI
+          docker push "yassineshili/visit_tunisia_backend:latest"
+          docker push "yassineshili/visit_tunisia_backend:$SHA"
+          docker push "yassineshili/visit_tunisia_frontend:latest"
+          docker push "yassineshili/visit_tunisia_frontend:$SHA"
+          docker push "yassineshili/visit_tunisia_ai:latest"
+          docker push "yassineshili/visit_tunisia_ai:$SHA"
+      - name: Verifier que le build passe (sans push)
+        if: env.PUSH_IMAGES != 'true'
+        run: docker compose build
