@@ -24,6 +24,7 @@ services:
   # ============================================================
   backend:
     build: ./Visit_Tunisia_Backend
+    image: yassineshili/visit_tunisia_backend:${TAG:-latest}
     container_name: vt_backend
     environment:
       DB_HOST: db
@@ -54,6 +55,7 @@ services:
   # ============================================================
   ai:
     build: ./Visit_Tunisia_AI
+    image: yassineshili/visit_tunisia_ai:${TAG:-latest}
     container_name: vt_ai
     environment:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
@@ -69,6 +71,7 @@ services:
   # ============================================================
   frontend:
     build: ./Visit_Tunisia_Frontend
+    image: yassineshili/visit_tunisia_frontend:${TAG:-latest}
     container_name: vt_frontend
     depends_on:
       - ai

@@ -50,13 +50,30 @@ Navigateur
    Le fichier `.env` est **absolument requis** (exclu de git via `.gitignore`).
 
 3. **Lancer l'application**
+
+   Deux modes possibles — **recommandé : télécharger les images pré-construites** (rapide, aucune compilation) :
+
    ```bash
+   # Mode rapide : telecharge les images Docker Hub (aucune compilation)
+   docker compose up -d
+   ```
+
+   > ⚙️ Pour définir une version précise des images (au lieu de `latest`) :
+   > ```bash
+   > TAG=abc1234 docker compose up -d
+   > ```
+
+   **Ou** mode développement : reconstruire localement depuis le code source :
+
+   ```bash
+   # Mode dev : recompile Angular + Maven + Python dans les images
    docker compose up --build -d
    ```
 
 4. **Ouvrir le navigateur** : http://localhost:4200
 
-> ⏳ Le premier démarrage télécharge les images et compile le backend (~5-10 min). Les démarrages suivants sont quasi instantanés.
+> ⏳ Le premier lancement télécharge les images (~1 min). Le mode `--build` peut prendre 5-10 min (compilation).
+> 💡 Les images sont poussées automatiquement sur [Docker Hub](https://hub.docker.com/u/yassineshili) par la CI à chaque push sur `main`.
 
 ## Configuration — variables d'environnement
 
@@ -108,10 +125,26 @@ Ces volumes survivent à `docker compose down` et ne sont détruits que par `dow
 Visit-Tunisia/
 ├── docker-compose.yml        # Orchestration des 4 services
 ├── .env.example              # Modèle de configuration (→ copier vers .env)
+├── .github/workflows/ci.yml  # Pipeline CI/CD (GitHub Actions)
 ├── Visit_Tunisia_Backend/    # Spring Boot + Python scrapers (Dockerfile inclus)
 ├── Visit_Tunisia_Frontend/   # Angular (Dockerfile + nginx.conf inclus)
 └── Visit_Tunisia_AI/         # FastAPI + Gemini (Dockerfile inclus)
 ```
+
+## CI/CD (GitHub Actions)
+
+À chaque push ou PR vers `main`, le pipeline `.github/workflows/ci.yml` :
+
+1. **Backend** : tests JUnit (contre un service PostGIS dédié) + empaquetage du jar
+2. **Frontend** : `npm ci` + build production Angular
+3. **AI** : installation Python + vérification de l'import
+4. **Images Docker** : construction des 3 images (backend, frontend, ai)
+
+Si la variable GitHub `PUSH_IMAGES=true`, les 3 images sont **poussées sur Docker Hub**
+(`yassineshili/visit_tunisia_*`) avec les tags `latest` et le SHA du commit.
+
+**Secrets GitHub requis** : `JWT_SECRET`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `WEATHER_API_KEY`
+(+ `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` si `PUSH_IMAGES=true`).
 
 ## Fonctionnalités
 
