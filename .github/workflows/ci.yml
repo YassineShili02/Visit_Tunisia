@@ -170,13 +170,23 @@ jobs:
             fi
             sleep 2
           done
-          for i in $(seq 1 40); do
+          backend_up=""
+          for i in $(seq 1 50); do
             if curl -sf http://localhost:8082/api/destinations -o /dev/null; then
-              echo "Backend repond apres ~$((i*3))s"; break
+              echo "Backend repond apres ~$((i*3))s"; backend_up=1; break
             fi
             sleep 3
           done
-          echo "Verif backend direct OK (ou timeout)"
+          echo "stat backend_up=${backend_up:-false}"
+          if [ -z "$backend_up" ]; then
+            echo "=== LOGS BACKEND (diagnostic) ==="
+            docker logs vt-backend 2>&1 | tail -50 || true
+            echo "=== LOGS FRONTEND ==="
+            docker logs vt-frontend 2>&1 | tail -30 || true
+            echo "=== CONTENEURS ==="
+            docker ps -a --format "{{.Names}} {{.Status}}" || true
+            exit 1
+          fi
 
       - name: Smoke test — verifier les reponses via le frontend nginx
         run: |
