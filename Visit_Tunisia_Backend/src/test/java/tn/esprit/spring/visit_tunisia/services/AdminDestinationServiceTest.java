@@ -17,6 +17,7 @@ import tn.esprit.spring.visit_tunisia.enums.TypeDestination;
 import tn.esprit.spring.visit_tunisia.exceptions.ValidationException;
 import tn.esprit.spring.visit_tunisia.mappers.DestinationMapper;
 import tn.esprit.spring.visit_tunisia.repositories.DestinationRepository;
+import tn.esprit.spring.visit_tunisia.services.JournalActionService;
 
 import java.util.*;
 
@@ -37,6 +38,9 @@ class AdminDestinationServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private JournalActionService journalActionService;
 
     @InjectMocks
     private AdminDestinationService service;
