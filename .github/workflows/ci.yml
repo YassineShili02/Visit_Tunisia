@@ -190,6 +190,15 @@ jobs:
 
       - name: Smoke test — verifier les reponses via le frontend nginx
         run: |
+          echo "=== ETAT CONTENEURS ==="
+          docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          echo "=== LOGS FRONTEND ==="
+          docker logs vt-frontend 2>&1 | tail -20 || echo "(pas de logs)"
+          echo "=== TEST FRONTEND DIRECT ==="
+          curl -sS -o /dev/null -w "frontend 4200 -> HTTP %{http_code}\n" http://localhost:4200/ || true
+          echo "=== TEST BACKEND DIRECT ==="
+          curl -sS -o /dev/null -w "backend 8082 -> HTTP %{http_code}\n" http://localhost:8082/api/destinations || true
+          echo "=== VERIFICATIONS ==="
           echo "1) Frontend :"
           curl -sf http://localhost:4200/ -o /dev/null && echo "   OK (page HTML)"
           echo "2) Backend destinations (via proxy nginx) :"
