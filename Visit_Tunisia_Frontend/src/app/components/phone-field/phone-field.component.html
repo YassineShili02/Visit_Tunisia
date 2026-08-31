@@ -1,0 +1,68 @@
+<div class="flex flex-col gap-1.5" (click)="$event.stopPropagation()">
+  <div class="relative flex gap-0">
+    <!-- Country picker button -->
+    <button type="button" (click)="toggleDropdown()"
+            class="flex items-center gap-1.5 px-3 py-3 shrink-0 transition-colors hover:bg-gray-50 rounded-l-xl border border-r-0"
+            [class.border-emerald-500]="digitCount > 0 && isValid"
+            [class.border-amber-400]="digitCount > 0 && !isValid"
+            [class.border-gray-200]="digitCount === 0"
+            style="min-width: 100px;">
+      <img [src]="flagUrl(selectedCountry.code)" [alt]="selectedCountry.code"
+           class="w-5 h-[15px] object-cover rounded-sm" />
+      <span class="font-medium text-xs" style="color: #1B6FA8;">{{ selectedCountry.dial }}</span>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round"
+           [style.transform]="dropdownOpen ? 'rotate(180deg)' : 'none'"
+           class="transition-transform">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+
+    <!-- Number input -->
+    <input type="tel"
+           [value]="localValue"
+           [attr.placeholder]="rule.placeholder"
+           [attr.maxlength]="rule.maxLen"
+           (input)="onLocalInput($any($event.target).value)"
+           class="flex-1 px-4 py-3 text-sm outline-none border border-l-0 rounded-r-xl transition-colors"
+           [class.border-emerald-500]="digitCount > 0 && isValid"
+           [class.border-amber-400]="digitCount > 0 && !isValid"
+           [class.border-gray-200]="digitCount === 0"
+           style="color: #2C2C2C; font-family: Inter, sans-serif;" />
+
+    <!-- Dropdown -->
+    <div *ngIf="dropdownOpen"
+         class="absolute top-full start-0 mt-1 rounded-xl overflow-hidden z-50 shadow-xl bg-white"
+         style="border: 1px solid rgba(27,111,168,0.15); width: 280px; max-height: 280px; display: flex; flex-direction: column;">
+      <div class="p-2 border-b" style="border-color: rgba(27,111,168,0.1);">
+        <input autofocus [(ngModel)]="search"
+               [attr.placeholder]="'countryPicker.search' | transloco"
+               class="w-full px-3 py-1.5 rounded-lg text-xs outline-none"
+               style="background: #F8FAFC; border: 1px solid rgba(27,111,168,0.12); color: #2C2C2C;" />
+      </div>
+      <div class="overflow-y-auto flex-1">
+        <button *ngFor="let c of filtered" type="button"
+                (click)="selectCountry(c)"
+                class="w-full flex items-center gap-2.5 px-3 py-2 text-start transition-colors hover:bg-blue-50"
+                [style.background]="c.code === countryCode ? 'rgba(27,111,168,0.06)' : 'transparent'">
+          <img [src]="flagUrl(c.code)" [alt]="c.code" class="w-5 h-[15px] object-cover rounded-sm" />
+          <span class="flex-1 text-xs" style="color: #2C2C2C;">{{ countryLabel(c) }}</span>
+          <span class="text-xs font-mono font-semibold" style="color: #1B6FA8;">{{ c.dial }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-time Validation Helper Badge -->
+  <div class="flex items-center justify-between text-[11px] px-1 font-medium transition-all">
+    <span [class.text-emerald-600]="digitCount > 0 && isValid"
+          [class.text-amber-600]="digitCount > 0 && !isValid"
+          [class.text-gray-400]="digitCount === 0"
+          class="flex items-center gap-1">
+      {{ statusMessage }}
+    </span>
+    <span *ngIf="digitCount > 0" class="text-gray-400 font-mono text-[10px]">
+      {{ digitCount }}/{{ rule.maxLen }}
+    </span>
+  </div>
+</div>

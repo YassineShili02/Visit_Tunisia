@@ -1,0 +1,259 @@
+<div class="min-h-screen bg-[#FBF9F5] pt-28 pb-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-1">{{ 'myItineraries.title' | transloco }}</h1>
+        <p class="text-gray-600">{{ 'myItineraries.subtitle' | transloco }}</p>
+      </div>
+      <a routerLink="/itinerary-form" class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-[#1B6FA8] hover:bg-[#155a8a] text-white rounded-xl text-sm font-semibold shadow-sm transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        {{ 'myItineraries.newItinerary' | transloco }}
+      </a>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let i of [1,2,3]" class="bg-white rounded-2xl overflow-hidden shadow-sm animate-pulse border border-gray-100">
+        <div class="h-48 bg-gray-200"></div>
+        <div class="p-6 space-y-3">
+          <div class="h-5 bg-gray-200 rounded w-3/4"></div>
+          <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div class="h-4 bg-gray-200 rounded w-full"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !isLoading" class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center max-w-md mx-auto">
+      <svg class="w-12 h-12 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <p class="text-red-700 font-medium mb-3">{{ 'myItineraries.errorLoad' | transloco }}</p>
+      <button (click)="loadItineraries()" class="px-5 py-2 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition">
+        {{ 'myItineraries.retry' | transloco }}
+      </button>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && !error && itineraries.length === 0" class="bg-white rounded-3xl p-12 text-center shadow-sm border border-gray-100 max-w-md mx-auto my-12">
+      <div class="w-20 h-20 rounded-2xl bg-sky-50 flex items-center justify-center mx-auto mb-4 text-[#1B6FA8]">
+        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">{{ 'myItineraries.emptyTitle' | transloco }}</h3>
+      <p class="text-gray-500 text-sm mb-6">{{ 'myItineraries.emptySubtitle' | transloco }}</p>
+      <a routerLink="/itinerary-form" class="inline-flex items-center gap-2 px-6 py-3 bg-[#1B6FA8] text-white rounded-xl font-semibold text-sm hover:bg-[#155a8a] transition shadow-md">
+        {{ 'myItineraries.planItinerary' | transloco }}
+      </a>
+    </div>
+
+    <!-- Itineraries Grid -->
+    <div *ngIf="!isLoading && !error && itineraries.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let itinerary of itineraries" 
+           class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all group border border-gray-100 flex flex-col justify-between cursor-pointer"
+           (click)="openDetails(itinerary)">
+        
+        <!-- Image & Badges -->
+        <div class="relative h-52 bg-slate-100 overflow-hidden">
+          <img [src]="getFirstDestinationPhoto(itinerary)" 
+                [alt]="displayTitle(itinerary)"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+               (error)="$any($event.target).src='https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600'">
+          
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
+
+          <!-- Duration Badge -->
+          <span class="absolute top-3 start-3 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-800 shadow-sm">
+            {{ 'myItineraries.' + (itinerary.dureeJours > 1 ? 'days' : 'day') | transloco }}: {{ itinerary.dureeJours }}
+          </span>
+
+          <!-- Budget Badge -->
+          <span *ngIf="itinerary.budgetTotal > 0" class="absolute top-3 end-3 bg-emerald-600/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+            {{ itinerary.budgetTotal }} {{ 'common.tnd' | transloco }}
+          </span>
+
+          <!-- Title overlay on bottom of photo -->
+          <div class="absolute bottom-3 inset-x-3 text-white">
+            <h3 class="text-base font-bold leading-snug line-clamp-2 drop-shadow-sm">{{ displayTitle(itinerary) }}</h3>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-5 flex-1 flex flex-col justify-between">
+          <div class="space-y-2.5 mb-4">
+            <div class="flex items-center gap-2 text-sm text-gray-600">
+              <svg class="w-4 h-4 text-[#1B6FA8] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <span class="font-medium">{{ getTotalDestinations(itinerary) }} {{ 'myItineraries.' + (getTotalDestinations(itinerary) > 1 ? 'steps' : 'step') | transloco }}</span>
+            </div>
+            
+            <div class="flex items-center gap-2 text-sm text-gray-600">
+              <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              <span>{{ itinerary.nombreVoyageurs }} {{ 'myItineraries.' + (itinerary.nombreVoyageurs > 1 ? 'travelers' : 'traveler') | transloco }}</span>
+            </div>
+
+            <div class="flex items-center gap-2 text-xs text-gray-400">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span>{{ 'myItineraries.savedOn' | transloco: { date: (itinerary.dateCreation | date:'dd/MM/yyyy') } }}</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2 pt-3 border-t border-gray-100">
+            <button (click)="openDetails(itinerary); $event.stopPropagation()"
+                    class="flex-1 px-4 py-2.5 bg-[#1B6FA8] hover:bg-[#155a8a] text-white rounded-xl text-sm font-semibold transition shadow-sm">
+              {{ 'myItineraries.viewDetails' | transloco }}
+            </button>
+            <button (click)="deleteItinerary(itinerary.itineraireId, $event)" 
+                    [title]="'myItineraries.deleteItineraryTitle' | transloco"
+                    class="px-3 py-2.5 border border-red-200 text-red-500 rounded-xl hover:bg-red-50 hover:text-red-700 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Modal Détails de l'itinéraire ─────────────────────────────────── -->
+  <div *ngIf="selectedItinerary" 
+       class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+       (click)="closeDetails()">
+    
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-fade-in"
+         (click)="$event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="relative bg-gradient-to-r from-[#1B6FA8] to-[#155a8a] text-white p-6 sm:p-8 flex-shrink-0">
+        <button (click)="closeDetails()" 
+                class="absolute top-5 end-5 w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <span class="inline-block px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-2">
+          {{ 'myItineraries.savedItineraryBadge' | transloco }}
+        </span>
+        <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">{{ displayTitle(selectedItinerary) }}</h2>
+        <div class="flex flex-wrap gap-4 text-xs sm:text-sm text-sky-100">
+          <span>📅 {{ 'myItineraries.tripDuration' | transloco: { n: selectedItinerary.dureeJours } }}</span>
+          <span>👥 {{ 'myItineraries.tripTravelers' | transloco: { n: selectedItinerary.nombreVoyageurs } }}</span>
+          <span *ngIf="selectedItinerary.budgetTotal">💰 {{ selectedItinerary.budgetTotal }} {{ 'common.tnd' | transloco }}</span>
+        </div>
+      </div>
+
+      <!-- Modal Body (Etapes par jour) - VERSION AMÉLIORÉE -->
+      <div class="p-6 overflow-y-auto flex-1 space-y-6">
+        <div *ngIf="!selectedItinerary.etapes || selectedItinerary.etapes.length === 0" class="text-center py-12 text-gray-400">
+          {{ 'myItineraries.noStep' | transloco }}
+        </div>
+
+        <div *ngFor="let group of getGroupedEtapes(selectedItinerary)" class="space-y-3 bg-gradient-to-br from-slate-50 to-white rounded-2xl p-4 border border-gray-100">
+          <!-- En-tête du jour -->
+          <div class="flex items-center justify-between pb-3 border-b-2 border-[#1B6FA8]/20">
+            <div class="flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1B6FA8] to-[#155a8a] text-white text-sm font-bold flex items-center justify-center shadow-md">
+                {{ 'myItineraries.dayShort' | transloco: { n: group.jour } }}
+              </span>
+              <div>
+                <h3 class="font-bold text-gray-800 text-base">{{ 'myItineraries.dayNumber' | transloco: { n: group.jour } }}</h3>
+                <span class="text-xs text-gray-500">{{ 'myItineraries.stepsInDay' | transloco: { n: group.etapes.length } }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liste des étapes du jour -->
+          <div class="space-y-3 ps-1">
+            <div *ngFor="let etape of group.etapes; let isLast = last" 
+                 class="relative ps-8">
+              
+              <!-- Timeline vertical -->
+              <div class="absolute start-2.5 top-0 bottom-0 flex flex-col items-center">
+                <div class="w-5 h-5 rounded-full bg-[#1B6FA8] border-3 border-white shadow-sm flex items-center justify-center flex-shrink-0">
+                  <span class="text-white text-[9px] font-bold">{{ etape.ordre }}</span>
+                </div>
+                <div *ngIf="!isLast" class="w-0.5 flex-1 bg-gradient-to-b from-[#1B6FA8]/40 to-gray-200 mt-1"></div>
+              </div>
+
+              <!-- Contenu de l'étape -->
+              <div class="bg-white hover:bg-sky-50/30 p-4 rounded-xl border border-gray-100 hover:border-[#1B6FA8]/30 transition-all shadow-sm hover:shadow-md">
+                <div class="flex gap-3.5">
+                  <!-- Photo -->
+                  <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-200 flex-shrink-0 shadow-sm">
+                    <img [src]="getStepPhoto(etape)" 
+                         [alt]="getDestinationName(etape.destination?.nom)" 
+                         class="w-full h-full object-cover"
+                         (error)="$any($event.target).src='https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=120'">
+                  </div>
+
+                  <!-- Détails -->
+                  <div class="flex-1 min-w-0">
+                    <!-- Heure & Nom -->
+                    <div class="flex items-start justify-between gap-2 mb-1.5">
+                      <div class="flex-1">
+                        <div class="text-[10px] font-semibold text-[#1B6FA8] uppercase tracking-wider mb-0.5">
+                          🕐 {{ etape.heurePrevue || '09:00' }}
+                        </div>
+                        <h4 class="font-bold text-gray-900 text-sm leading-tight">
+                          {{ getDestinationName(etape.destination?.nom) }}
+                        </h4>
+                      </div>
+                      <a *ngIf="etape.destination?.destinationId" 
+                         [routerLink]="['/destinations', etape.destination.destinationId]"
+                         (click)="$event.stopPropagation()"
+                         class="px-3 py-1.5 bg-[#1B6FA8] hover:bg-[#155a8a] text-white rounded-lg text-xs font-semibold transition shadow-sm flex-shrink-0">
+                        {{ 'myItineraries.view' | transloco }}
+                      </a>
+                    </div>
+
+                    <!-- Infos complémentaires -->
+                    <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 mt-2">
+                      <span *ngIf="etape.dureeVisite" class="flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="font-medium">{{ formatDuration(etape.dureeVisite) }}</span>
+                      </span>
+                      <span *ngIf="etape.tempsTrajet" class="flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                        <span>{{ 'itineraryResult.transit' | transloco: { info: formatDuration(etape.tempsTrajet) } }}</span>
+                      </span>
+                      <span *ngIf="etape.destination?.destinationId" class="flex items-center gap-1 text-gray-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                        </svg>
+                        <span class="font-mono">ID {{ etape.destination.destinationId }}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+        <button (click)="deleteItinerary(selectedItinerary.itineraireId)" 
+                class="text-xs font-semibold text-red-600 hover:text-red-700 px-3 py-2 rounded-lg hover:bg-red-50 transition">
+          {{ 'myItineraries.deleteThisItinerary' | transloco }}
+        </button>
+        <button (click)="closeDetails()" 
+                class="px-5 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-xl text-xs font-bold transition">
+          {{ 'myItineraries.close' | transloco }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

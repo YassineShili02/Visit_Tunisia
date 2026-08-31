@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', 'Poppins', sans-serif;
+  }
+  /* Use a slightly larger Arabic-friendly font for RTL locales */
+  html[lang="ar"] body {
+    font-family: 'Tajawal', 'Cairo', 'Inter', sans-serif;
+  }
+  /* Direction-driven flex/grid utilities. Tailwind v3 already has logical
+     properties (ms-*, me-*, ps-*, pe-*, start-*, end-, text-start, text-end)
+     that flip with dir="rtl" automatically. */
+}

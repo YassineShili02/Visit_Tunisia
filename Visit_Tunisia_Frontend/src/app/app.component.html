@@ -1,0 +1,38 @@
+<div class="min-h-screen bg-background font-inter" style="font-family: Inter, sans-serif;">
+
+  <!-- Navbar (masquée sur les pages admin, onboarding et auth) -->
+  <app-navbar
+    *ngIf="showNavbar()"
+    [currentPage]="currentPage"
+    [user]="user"
+    (authClick)="nav.openAuth()"
+    (accountClick)="nav.navigate('account')"
+    (adminClick)="nav.navigate('admin')"
+    (logout)="handleLogout()"
+    (navigate)="onNavigate($event)"
+    (searchClick)="nav.openSearch()"
+    (openConversations)="requestChatHistory()"
+    (favoritesClick)="nav.navigate('favorites')">
+  </app-navbar>
+
+  <!-- Search Modal (disponible sur toutes les pages sauf admin) -->
+  <app-search-modal
+    *ngIf="!isAdminPage()"
+    [open]="searchOpen"
+    [user]="user"
+    (close)="nav.closeSearch()"
+    (navigate)="onNavigate($event)">
+  </app-search-modal>
+
+  <!-- Chat Widget (disponible sur toutes les pages sauf admin/auth) -->
+  <app-chat-widget
+    *ngIf="!isAdminPage() && !isAuthPage()"
+    [user]="user"
+    [openHistory]="chatHistoryRequested"
+    (authClick)="nav.openAuth()">
+  </app-chat-widget>
+
+  <!-- Router Outlet : charge dynamiquement le composant correspondant à l'URL -->
+  <router-outlet></router-outlet>
+
+</div>

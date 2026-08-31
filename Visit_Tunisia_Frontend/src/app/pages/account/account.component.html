@@ -1,0 +1,396 @@
+<div class="flex min-h-screen bg-gray-50 pt-[68px]">
+  <!-- Sidebar -->
+  <aside class="w-60 bg-white border-r border-gray-200 flex flex-col shrink-0 sticky top-[68px] h-[calc(100vh-68px)]">
+    <!-- User Card -->
+    <div class="p-6 border-b border-gray-100 text-center">
+      <div class="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold mx-auto mb-3">
+        {{ (profileForm.prenom?.charAt(0) || '') + (profileForm.nom?.charAt(0) || '') }}
+      </div>
+      <p class="font-semibold text-gray-900">{{ profileForm.prenom }} {{ profileForm.nom }}</p>
+      <p class="text-sm text-gray-500">{{ profileForm.email }}</p>
+      <span *ngIf="currentUser" class="inline-flex items-center gap-1 mt-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        {{ 'account.verified' | transloco }}
+      </span>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 p-3 space-y-1">
+      <button *ngFor="let item of navItems"
+              (click)="setSection(item.id)"
+              class="w-full flex items-center gap-3 text-start px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+              [class.bg-blue-50]="section === item.id"
+              [class.text-blue-700]="section === item.id"
+              [class.text-gray-600]="section !== item.id"
+              [class.hover:bg-gray-50]="section !== item.id">
+        <span [innerHTML]="getNavIcon(item.icon)"></span>
+        {{ item.labelKey | transloco }}
+      </button>
+    </nav>
+
+    <!-- Logout -->
+    <div class="p-4 border-t border-gray-100">
+      <button class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        {{ 'account.logout' | transloco }}
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8 overflow-y-auto">
+    <!-- PROFIL -->
+    <div *ngIf="section === 'profil'">
+      <h1 class="text-2xl font-bold text-gray-900 mb-6">{{ 'account.profileTitle' | transloco }}</h1>
+
+      <!-- Avatar -->
+      <div class="flex items-center gap-4 mb-8">
+        <div class="relative">
+          <div class="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold">
+            {{ (profileForm.prenom?.charAt(0) || '') + (profileForm.nom?.charAt(0) || '') }}
+          </div>
+          <button class="absolute bottom-0 end-0 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center border border-gray-200 hover:bg-gray-50">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </button>
+        </div>
+        <div>
+          <p class="font-semibold text-gray-900">{{ profileForm.prenom }} {{ profileForm.nom }}</p>
+          <p class="text-sm text-gray-500">{{ profileForm.email }}</p>
+          <span *ngIf="currentUser" class="inline-flex items-center gap-1 mt-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            {{ 'account.verified' | transloco }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="bg-white rounded-2xl p-6 border border-gray-200 max-w-xl">
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'account.firstName' | transloco }}</label>
+              <input [(ngModel)]="profileForm.prenom" type="text" disabled class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-gray-50 cursor-not-allowed" />
+              <p class="text-xs text-gray-400 mt-1">{{ 'account.nonModifiable' | transloco }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'account.lastName' | transloco }}</label>
+              <input [(ngModel)]="profileForm.nom" type="text" disabled class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-gray-50 cursor-not-allowed" />
+              <p class="text-xs text-gray-400 mt-1">{{ 'account.nonModifiable' | transloco }}</p>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'account.email' | transloco }}</label>
+            <input [(ngModel)]="profileForm.email" type="email" disabled class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-gray-50 cursor-not-allowed" />
+            <p class="text-xs text-gray-400 mt-1">{{ 'account.nonModifiable' | transloco }}</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'account.birthDate' | transloco }}</label>
+            <input [(ngModel)]="profileForm.dateNaissance" type="date" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'account.country' | transloco }}</label>
+            <app-country-picker
+              [selectedCountryName]="profileForm.pays"
+              (countryChange)="onCountryChange($event)">
+            </app-country-picker>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'account.phone' | transloco }}</label>
+            <app-phone-field
+              [dial]="phoneDial"
+              [localValue]="phoneLocal"
+              (dialChange)="onPhoneDial($event)"
+              (localChange)="onPhoneLocal($event)">
+            </app-phone-field>
+          </div>
+        </div>
+        
+        <div class="mt-6 flex items-center gap-3">
+          <button 
+            (click)="saveProfile()" 
+            [disabled]="profileLoading"
+            class="px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer">
+            <svg *ngIf="profileLoading" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            {{ profileLoading ? ('account.saving' | transloco) : ('account.save' | transloco) }}
+          </button>
+          <span *ngIf="profileSaved" class="text-sm text-green-600 font-medium flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ 'account.savedToast' | transloco }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SÉCURITÉ & MOT DE PASSE -->
+    <div *ngIf="section === 'securite'">
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ 'account.securityTitle' | transloco }}</h1>
+      <p class="text-gray-500 mb-6">{{ 'account.securitySubtitle' | transloco }}</p>
+
+      <!-- Google Account Notice -->
+      <div *ngIf="currentUser?.provider === 'GOOGLE'" class="bg-blue-50 border border-blue-200 rounded-2xl p-6 max-w-xl flex items-start gap-4">
+        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-blue-600">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-semibold text-blue-900 text-sm mb-1">{{ 'account.googleAccountNotice' | transloco }}</h3>
+          <p class="text-xs text-blue-700 leading-relaxed">
+            {{ 'account.googleAccountDescription' | transloco }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Change Password Form for Local Users -->
+      <div *ngIf="currentUser?.provider !== 'GOOGLE'" class="bg-white rounded-2xl p-6 border border-gray-200 max-w-xl shadow-sm">
+        
+        <!-- Error Alert -->
+        <div *ngIf="passwordError" class="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-start gap-3">
+          <svg class="shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <div>{{ passwordError }}</div>
+        </div>
+
+        <!-- Success Alert -->
+        <div *ngIf="passwordSuccess" class="mb-5 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-start gap-3">
+          <svg class="shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+          <div class="font-medium">{{ 'account.passwordChanged' | transloco }}</div>
+        </div>
+
+        <form (ngSubmit)="changePassword()" class="space-y-5">
+          <!-- Ancien Mot de passe -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.currentPassword' | transloco }}</label>
+            <div class="relative">
+              <input
+                [(ngModel)]="passwordForm.ancienMotDePasse"
+                name="ancienMotDePasse"
+                [type]="showAncienPassword ? 'text' : 'password'"
+                [attr.placeholder]="'account.currentPasswordPlaceholder' | transloco"
+                class="w-full ps-4 pe-11 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+              <button
+                type="button"
+                (click)="showAncienPassword = !showAncienPassword"
+                class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1 cursor-pointer">
+                <svg *ngIf="!showAncienPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg *ngIf="showAncienPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Nouveau Mot de passe -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.newPassword' | transloco }}</label>
+            <div class="relative">
+              <input
+                [(ngModel)]="passwordForm.nouveauMotDePasse"
+                name="nouveauMotDePasse"
+                [type]="showNouveauPassword ? 'text' : 'password'"
+                [attr.placeholder]="'account.newPasswordHint' | transloco"
+                class="w-full ps-4 pe-11 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+              <button
+                type="button"
+                (click)="showNouveauPassword = !showNouveauPassword"
+                class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1 cursor-pointer">
+                <svg *ngIf="!showNouveauPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg *ngIf="showNouveauPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+              </button>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">{{ 'account.newPasswordHintLong' | transloco }}</p>
+          </div>
+
+          <!-- Confirmer le Nouveau Mot de passe -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.confirmNewPassword' | transloco }}</label>
+            <div class="relative">
+              <input
+                [(ngModel)]="passwordForm.confirmMotDePasse"
+                name="confirmMotDePasse"
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                [attr.placeholder]="'account.confirmNewPasswordPlaceholder' | transloco"
+                class="w-full ps-4 pe-11 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+              <button
+                type="button"
+                (click)="showConfirmPassword = !showConfirmPassword"
+                class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1 cursor-pointer">
+                <svg *ngIf="!showConfirmPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg *ngIf="showConfirmPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="pt-2 flex items-center gap-3">
+            <button 
+              type="submit" 
+              [disabled]="passwordLoading"
+              class="px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer shadow-sm">
+              <svg *ngIf="passwordLoading" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              {{ (passwordLoading ? 'account.updating' : 'account.updatePassword') | transloco }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- PRÉFÉRENCES -->
+    <div *ngIf="section === 'preferences'">
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ 'account.prefsTitle' | transloco }}</h1>
+      <p class="text-gray-500 mb-6">{{ 'account.prefsSubtitle' | transloco }}</p>
+
+      <div class="grid grid-cols-3 gap-4 max-w-3xl">
+        <button *ngFor="let key of ['Culturel','Balnéaire','Écologique','Gastronomique','Aventure','Religieux']"
+                (click)="togglePref(key)"
+                class="relative p-5 rounded-2xl border-2 text-start transition-all"
+                [class.border-blue-500]="isPrefSelected(key)"
+                [class.bg-blue-50]="isPrefSelected(key)"
+                [class.border-gray-200]="!isPrefSelected(key)"
+                [class.bg-white]="!isPrefSelected(key)"
+                [class.hover:border-gray-300]="!isPrefSelected(key)">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center mb-3" [style.background]="getPrefColor(key) + '18'">
+            <span [innerHTML]="getPrefIcon(key)" [style.color]="getPrefColor(key)"></span>
+          </div>
+          <p class="font-semibold text-gray-900 text-sm">{{ prefLabel(key) }}</p>
+          <div *ngIf="isPrefSelected(key)" class="absolute top-3 end-3 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+        </button>
+      </div>
+
+      <div class="mt-6 flex items-center gap-3">
+        <button (click)="savePrefs()" class="px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+          {{ 'account.save' | transloco }}
+        </button>
+        <span *ngIf="prefsSaved" class="text-sm text-green-600 font-medium flex items-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          {{ 'account.prefsSaved' | transloco }}
+        </span>
+      </div>
+
+      <!-- LANGUE DU COMPTE -->
+      <div class="mt-10 pt-8 border-t border-gray-100 max-w-md">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">{{ 'account.languageTitle' | transloco }}</h2>
+        <p class="text-gray-500 text-sm mb-4">{{ 'account.languageSubtitle' | transloco }}</p>
+
+        <div class="space-y-2">
+          <button *ngFor="let lang of languages"
+                  (click)="selectLanguage(lang.code)"
+                  class="w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-start transition-all"
+                  [class]="activeLang === lang.code ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'">
+            <span class="text-lg font-medium text-gray-900">{{ lang.native }}</span>
+            <span class="text-sm text-gray-500">{{ lang.label }}</span>
+            <span *ngIf="activeLang === lang.code" class="ms-auto flex items-center gap-3">
+              <span *ngIf="langSaving && activeLang === lang.code" class="text-xs text-gray-400">...</span>
+              <span *ngIf="langSaved && activeLang === lang.code" class="text-green-600">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span class="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </span>
+            </span>
+          </button>
+        </div>
+
+        <p class="text-xs text-gray-400 mt-3">{{ 'account.languageDefaultHint' | transloco }}</p>
+      </div>
+    </div>
+
+    <!-- ITINÉRAIRES -->
+    <div *ngIf="section === 'itineraires'">
+      <h1 class="text-2xl font-bold text-gray-900 mb-6">{{ 'account.itinerariesTitle' | transloco }}</h1>
+
+      <div class="space-y-4 max-w-3xl">
+        <div *ngFor="let it of itineraries" class="bg-white rounded-2xl border border-gray-200 p-5 flex items-center gap-5">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" [style.background]="it.color + '18'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" [attr.stroke]="it.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-900">{{ it.title }}</p>
+            <p class="text-sm text-gray-500 truncate">{{ it.stops.join(' → ') }}</p>
+          </div>
+          <div class="text-end shrink-0">
+            <p class="text-sm text-gray-500">{{ 'account.itineraryMeta' | transloco: { days: it.days, people: it.people } }}</p>
+            <p class="text-xs text-gray-400">{{ formatDate(it.date) }}</p>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button class="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">{{ 'account.view' | transloco }}</button>
+            <button class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">{{ 'account.delete' | transloco }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVIS -->
+    <div *ngIf="section === 'avis'">
+      <h1 class="text-2xl font-bold text-gray-900 mb-6">{{ 'account.reviewsTitle' | transloco }}</h1>
+
+      <!-- Loading state -->
+      <div *ngIf="reviewsLoading" class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1B6FA8]"></div>
+      </div>
+
+      <!-- Reviews list -->
+      <div *ngIf="!reviewsLoading" class="space-y-4 max-w-3xl">
+        <div *ngFor="let review of userReviews" 
+             (click)="navigateToDestination(review.destinationId)"
+             class="bg-white rounded-2xl border border-gray-200 p-5 hover:shadow-md transition-all cursor-pointer hover:border-[#1B6FA8]">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex-1">
+              <h3 class="font-semibold text-gray-900 hover:text-[#1B6FA8] transition-colors">
+                {{ review.destinationNom }}
+              </h3>
+              <div class="flex items-center gap-2 mt-2">
+                <div class="flex items-center gap-1">
+                  <svg *ngFor="let i of renderStars(review.note)"
+                       xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       [attr.fill]="isFilled(i, review.note) ? '#F59E0B' : 'none'"
+                       [attr.stroke]="isFilled(i, review.note) ? '#F59E0B' : '#D1D5DB'"
+                       stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span *ngFor="let cat of (review.categories && review.categories.length > 0 ? review.categories : [review.categorie])" 
+                        class="text-xs font-medium px-2.5 py-0.5 rounded-full" 
+                        [style.background]="getPrefColor(cat) + '18'" 
+                        [style.color]="getPrefColor(cat)">
+                    {{ cat }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <span *ngIf="review.statutModeration === 'MASQUE'"
+                  class="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+              {{ 'account.reviewHidden' | transloco }}
+            </span>
+            <span *ngIf="review.statutModeration === 'EN_ATTENTE'"
+                  class="text-xs font-medium px-2 py-1 rounded-full bg-yellow-100 text-yellow-600">
+              {{ 'account.reviewPending' | transloco }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600 mb-3" *ngIf="review.commentaire">{{ review.commentaire }}</p>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400">{{ formatDate(review.dateCreation) }}</span>
+            <span class="text-gray-300">·</span>
+            <button (click)="$event.stopPropagation()" class="text-xs text-blue-600 hover:underline">{{ 'common.edit' | transloco }}</button>
+            <button (click)="$event.stopPropagation(); deleteReview(review.avisId)" class="text-xs text-red-600 hover:underline">{{ 'account.delete' | transloco }}</button>
+          </div>
+        </div>
+
+        <p *ngIf="userReviews.length === 0" class="text-gray-400 text-sm py-8 text-center">
+          {{ 'account.noReviews' | transloco }}
+        </p>
+      </div>
+    </div>
+  </main>
+</div>

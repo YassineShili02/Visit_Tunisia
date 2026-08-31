@@ -1,0 +1,16 @@
+:host { display: block; }
+
+/* High-quality image rendering for hero images */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  /* Force high-quality downscaling on modern browsers */
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Ensure smooth scaling for hover effects */
+.group:hover img {
+  image-rendering: auto;
+}

@@ -1,0 +1,630 @@
+<div class="container mx-auto px-4 sm:px-8 pt-24 pb-6 max-w-[1400px]">
+
+  <!-- ERROR BANNER (visible when loadError is set) -->
+  <div *ngIf="loadError" class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-5 sm:p-6 flex items-start gap-3" role="alert">
+    <svg class="w-6 h-6 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <div class="min-w-0 flex-1">
+      <h3 class="text-red-800 font-bold mb-1">{{ 'destination.loadErrorTitle' | transloco }}</h3>
+      <p class="text-red-700 text-sm">{{ loadError }}</p>
+      <button type="button" (click)="numericDestinationId && fetchDestinationDetails(numericDestinationId)"
+        class="mt-3 inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all cursor-pointer">
+        {{ 'common.retry' | transloco }}
+      </button>
+    </div>
+  </div>
+
+  <!-- BREADCRUMB -->
+  <nav class="text-sm text-gray-500 mb-5 flex items-center gap-1.5 flex-wrap" [attr.aria-label]="'destination.breadcrumbAria' | transloco">
+    <span class="hover:text-[#1B6FA8] cursor-pointer font-medium" (click)="navigate.emit('home')">{{ 'destination.breadcrumbHome' | transloco }}</span>
+    <span>/</span>
+    <span class="hover:text-[#1B6FA8] cursor-pointer font-medium" (click)="navigate.emit('catalog')">{{ 'destination.breadcrumbCatalog' | transloco }}</span>
+    <span>/</span>
+    <span class="text-gray-900 font-bold truncate max-w-xs sm:max-w-md">{{ destination?.name || ('destination.defaultTitle' | transloco) }}</span>
+  </nav>
+
+  <!-- ============ IMMERSIVE HERO (photo + title overlay) ============ -->
+  <div class="relative mb-10 animate-fade-in">
+    <div
+      class="relative rounded-[2rem] overflow-hidden shadow-xl h-[440px] sm:h-[520px] lg:h-[560px] bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 group">
+
+      <!-- Loading skeleton -->
+      <div *ngIf="isLoading" class="absolute inset-0 flex items-center justify-center">
+        <div class="flex flex-col items-center gap-4">
+          <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white/40"></div>
+          <span class="text-white/60 text-sm font-medium">{{ 'catalog.loading' | transloco }}</span>
+        </div>
+      </div>
+
+      <!-- Background photo -->
+      <img *ngIf="!isLoading && photos.length > 0" [src]="photos[activePhoto].url" [alt]="photos[activePhoto].alt"
+        (click)="openLightbox(activePhoto, $event)"
+        class="absolute inset-0 w-full h-full object-cover cursor-zoom-in transition-transform duration-700 group-hover:scale-105" />
+
+      <!-- No-photo placeholder -->
+      <div *ngIf="!isLoading && photos.length === 0" class="absolute inset-0 flex items-center justify-center">
+        <svg class="w-24 h-24 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <polyline points="21 15 16 10 5 21" />
+        </svg>
+      </div>
+
+      <!-- Readability gradients -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-black/30 pointer-events-none"></div>
+
+      <!-- TOP BAR : type/category chips + save -->
+      <div *ngIf="!isLoading" class="absolute top-0 inset-x-0 p-5 sm:p-6 flex items-start justify-between gap-3">
+        <div class="flex flex-wrap gap-2">
+          <span
+            class="text-xs font-bold px-3 py-1.5 rounded-full bg-white/15 text-white border border-white/30 backdrop-blur-md shadow-md">
+            {{ typeLabel(destination?.estType || destination?.type) }}
+          </span>
+
+          <!-- Display all categories -->
+          <ng-container *ngIf="destination?.categories?.length; else singleCategory">
+            <span
+              *ngFor="let cat of destination!.categories"
+              class="text-xs font-bold px-3 py-1.5 rounded-full bg-white/95 border border-white/40 backdrop-blur-md shadow-md"
+              [style.color]="getCategoryColor(cat)">
+              {{ categoryLabel(cat) }}
+            </span>
+          </ng-container>
+          <ng-template #singleCategory>
+            <span
+              *ngIf="destination?.category"
+              class="text-xs font-bold px-3 py-1.5 rounded-full bg-white/95 border border-white/40 backdrop-blur-md shadow-md"
+              [style.color]="getCategoryColor(destination!.category!)">
+              {{ categoryLabel(destination!.category!) }}
+            </span>
+          </ng-template>
+        </div>
+
+        <button *ngIf="authService.isAuthenticated()" (click)="toggleFavorite()" [attr.aria-pressed]="isFavorite"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs backdrop-blur-md border shadow-md transition-all cursor-pointer"
+          [ngClass]="isFavorite ? 'bg-white text-gray-900 border-white' : 'bg-white/15 text-white border-white/40 hover:bg-white/25'">
+          <svg class="w-4 h-4" [class.text-red-500]="isFavorite" [class.fill-current]="isFavorite" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          <span class="hidden sm:inline">{{ (isFavorite ? 'destination.saved' : 'destination.save') | transloco }}</span>
+        </button>
+      </div>
+
+      <!-- BOTTOM : title, badges, photo controls -->
+      <div *ngIf="!isLoading" class="absolute bottom-0 inset-x-0 p-6 sm:p-8 flex flex-col md:flex-row md:items-end justify-between gap-5">
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 text-white/90 text-sm font-semibold mb-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {{ regionLabel(destination?.region) }}
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md mb-4">{{ destination?.name }}</h1>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Price -->
+            <span *ngIf="destination?.price === 0"
+              class="text-xs font-bold px-3 py-1.5 rounded-full bg-white/95 text-emerald-700 border border-white/40 backdrop-blur-md shadow-md">
+              {{ 'destination.entranceFree' | transloco }}
+            </span>
+            <span *ngIf="destination?.price && destination!.price > 0"
+              class="text-xs font-bold px-3 py-1.5 rounded-full bg-white/95 text-blue-700 border border-white/40 backdrop-blur-md shadow-md">
+              {{ destination?.price }} TND
+            </span>
+            <!-- PMR -->
+            <span *ngIf="hasAccessibilitePmr"
+              class="text-xs font-bold px-3 py-1.5 rounded-full bg-white/95 text-emerald-700 border border-white/40 backdrop-blur-md shadow-md">
+              {{ 'destination.pmrAccess' | transloco }}
+            </span>
+            <!-- Rating -->
+            <span *ngIf="hasReviews"
+              class="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-white/95 text-gray-900 border border-white/40 backdrop-blur-md shadow-md">
+              <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              {{ reviewStats.noteMoyenne | number:'1.1-1' }}
+              <span class="text-gray-500 font-semibold">({{ 'destination.reviewsCount' | transloco: { count: reviewStats.totalAvis } }})</span>
+            </span>
+            <span *ngIf="!hasReviews"
+              class="text-xs font-bold px-3 py-1.5 rounded-full bg-white/15 text-white border border-white/30 backdrop-blur-md shadow-md">
+              {{ 'destination.notYetRated' | transloco }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Photo controls -->
+        <div class="flex items-center gap-2.5 shrink-0">
+          <div *ngIf="photos.length > 1" class="hidden md:flex items-center gap-2">
+            <button *ngFor="let p of photos; let i = index" (click)="selectPhoto(i)" [ngClass]="{
+              'w-14 h-11 rounded-xl overflow-hidden border-2 transition-all cursor-pointer': true,
+              'border-white opacity-100': activePhoto === i,
+              'border-white/40 opacity-70': activePhoto !== i
+            }" [attr.aria-label]="'destination.photoAria' | transloco: { n: i + 1 }">
+              <img [src]="p.url" [alt]="p.alt" class="w-full h-full object-cover" />
+            </button>
+          </div>
+          <button *ngIf="photos.length > 0" (click)="openLightbox(activePhoto, $event)"
+            class="flex items-center gap-2 bg-white text-gray-900 font-extrabold text-xs px-4 py-2.5 rounded-2xl shadow-xl hover:bg-gray-100 transition-all cursor-pointer border border-gray-100">
+            <svg class="w-4 h-4 text-[#1B6FA8]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+            {{ 'destination.seeAllPhotos' | transloco: { count: photos.length } }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MAIN LAYOUT ============ -->
+  <div class="flex flex-col lg:flex-row gap-8">
+    <!-- LEFT COLUMN -->
+    <div class="lg:w-[70%] space-y-8">
+
+      <!-- À Propos -->
+      <div *ngIf="descriptionText" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-xs">
+        <h2 class="text-2xl font-black text-gray-900 mb-4 flex items-center gap-2">
+          <span class="w-2.5 h-6 bg-[#1B6FA8] rounded-full"></span>
+          {{ 'destination.aboutTitle' | transloco }}
+        </h2>
+        <p class="text-gray-600 leading-7 text-base whitespace-pre-line">{{ descriptionText }}</p>
+      </div>
+
+      <!-- Informations pratiques -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-xs">
+        <h2 class="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
+          <span class="w-2.5 h-6 bg-[#D97D45] rounded-full"></span>
+          {{ 'destination.practicalTitle' | transloco }}
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div *ngFor="let info of practical"
+            class="bg-gray-50/80 hover:bg-white border border-gray-100 hover:border-[#1B6FA8]/30 hover:shadow-md rounded-2xl p-5 transition-all">
+            <div class="flex items-start gap-3.5">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-xs"
+                [ngClass]="iconClasses(info.icon)">
+                <svg *ngIf="info.icon === 'Clock'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <svg *ngIf="info.icon === 'Banknote'" class="w-5 h-5" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24" stroke-width="2">
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path
+                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  <path d="M2 12h20" />
+                </svg>
+                <svg *ngIf="info.icon === 'Accessibility'" class="w-5 h-5" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24" stroke-width="2">
+                  <circle cx="16" cy="4" r="1" />
+                  <path d="m18 19 1-7-6 1" />
+                  <path d="m5 8 3-3 5.5 3-2.36 3.5" />
+                  <path d="M4.24 14.5a5 5 0 0 0 6.88 6" />
+                  <path d="M13.76 17.5a5 5 0 0 0-6.88-6" />
+                </svg>
+                <svg *ngIf="info.icon === 'MapPin'" class="w-5 h-5" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <svg *ngIf="info.icon === 'Car'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  stroke-width="2">
+                  <path
+                    d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
+                  <circle cx="6.5" cy="16.5" r="2.5" />
+                  <circle cx="16.5" cy="16.5" r="2.5" />
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <div class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider mb-1">{{ info.label }}
+                </div>
+                <div class="text-sm font-bold text-gray-900 whitespace-pre-line leading-snug">{{ info.value }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEARBY DESTINATIONS -->
+      <section *ngIf="nearbyDestinations.length > 0" class="mb-8">
+        <div class="flex items-center gap-3 mb-6">
+          <svg class="w-6 h-6 text-[#1B6FA8]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="3"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <h2 class="text-2xl font-bold text-gray-900">{{ 'destination.nearbyTitle' | transloco }}</h2>
+        </div>
+
+        <div *ngIf="isLoadingNearby" class="flex items-center justify-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1B6FA8]"></div>
+        </div>
+
+        <div *ngIf="!isLoadingNearby" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div *ngFor="let dest of nearbyDestinations"
+               (click)="goToNearbyDestination(dest.id)"
+               class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer group">
+            <!-- Image -->
+            <div class="relative h-48 overflow-hidden">
+              <img *ngIf="dest.imageUrl"
+                   [src]="dest.imageUrl"
+                   [alt]="dest.name"
+                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                   onerror="this.src='assets/images/placeholder.jpg'" />
+              <div *ngIf="!dest.imageUrl"
+                   class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+
+              <!-- Distance badge -->
+              <div class="absolute top-3 end-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-[#1B6FA8]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="text-sm font-bold text-gray-900">{{ dest.distanceKm }} km</span>
+              </div>
+
+              <!-- Category badge -->
+              <div class="absolute top-3 start-3 px-2.5 py-1 rounded-full text-xs font-semibold text-white shadow-md"
+                   [style.background]="getCategoryColor(dest.category)">
+                {{ categoryLabel(dest.category) }}
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-4">
+              <h3 class="font-bold text-gray-900 mb-2 group-hover:text-[#1B6FA8] transition-colors line-clamp-2">
+                {{ dest.name }}
+              </h3>
+
+              <div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{{ dest.region }}</span>
+              </div>
+
+              <div *ngIf="dest.price > 0" class="flex items-center gap-2 text-sm font-semibold text-[#1B6FA8]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{{ 'destination.priceNearby' | transloco: { price: dest.price } }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- REVIEWS -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-xs">
+        <h2 class="text-2xl font-black text-gray-900 mb-6 flex items-center justify-between">
+          <span class="flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-yellow-400 rounded-full"></span>
+            {{ 'destination.reviewsTitle' | transloco }}
+          </span>
+          <span class="text-sm font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{{ 'destination.reviewsCount' | transloco: { count: reviewStats.totalAvis } }}</span>
+        </h2>
+
+        <!-- Overview (only when reviews exist) -->
+        <div *ngIf="hasReviews"
+          class="bg-gradient-to-br from-amber-50/50 via-sky-50/30 to-white border border-amber-100 rounded-3xl p-6 mb-8 flex flex-col sm:flex-row items-center gap-6">
+          <div class="text-center sm:border-e border-amber-200/60 sm:pe-8">
+            <div class="text-6xl font-black text-[#1B6FA8] tracking-tight mb-1">{{ reviewStats.noteMoyenne |
+              number:'1.1-1' }}</div>
+            <div class="flex gap-1 justify-center mb-1">
+              <svg *ngFor="let i of renderStars(5)" class="w-5 h-5"
+                [class.text-yellow-400]="isFilled(i, getRatingInt())"
+                [class.text-gray-300]="!isFilled(i, getRatingInt())" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </div>
+            <div class="text-xs font-bold text-gray-600">{{ 'destination.distribution' | transloco }}</div>
+          </div>
+          <div class="flex-1 w-full space-y-2">
+            <div *ngFor="let s of [5,4,3,2,1]" class="flex items-center gap-3 text-xs">
+              <span class="w-12 text-end font-extrabold text-gray-700 flex items-center justify-end gap-1">
+                {{ s }} <svg class="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </span>
+              <div class="flex-1 h-3 bg-gray-200/80 rounded-full overflow-hidden shadow-inner">
+                <div
+                  class="h-full bg-gradient-to-r from-amber-400 to-yellow-400 rounded-full transition-all duration-500"
+                  [style.width]="getStarPercentage(s) + '%'"></div>
+              </div>
+              <span class="w-10 text-end text-gray-500 font-mono font-bold text-xs">{{
+                reviewStats.distributionEtoiles[s] || 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Friendly empty state -->
+        <div *ngIf="!hasReviews"
+          class="border-2 border-dashed border-amber-200 bg-amber-50/40 rounded-3xl p-8 mb-8 text-center">
+          <div
+            class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white shadow-sm border border-amber-100 flex items-center justify-center">
+            <svg class="w-8 h-8 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          </div>
+
+          <p class="font-extrabold text-gray-800 text-sm">{{ 'destination.emptyTitle' | transloco }}</p>
+          <p class="text-xs text-gray-500 mt-1 mb-4">{{ 'destination.emptySubtitle' | transloco }}</p>
+          <button (click)="scrollToReviewForm()"
+            class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-amber-950 font-extrabold text-xs rounded-xl transition-all shadow-sm cursor-pointer">
+            {{ 'destination.firstReview' | transloco }}
+          </button>
+        </div>
+
+        <!-- REVIEW FORM -->
+        <div id="review-form"
+          class="bg-gradient-to-br from-blue-50/90 to-sky-50/70 border border-blue-200/80 rounded-3xl p-6 mb-8 shadow-xs">
+          <h3 class="text-lg font-black text-gray-900 mb-1">{{ (hasUserReviewed ? 'destination.editMyReview' : 'destination.leaveMyReview') | transloco }}</h3>
+          <p class="text-xs text-gray-600 mb-4 font-medium">{{ 'destination.ratingHelp' | transloco }}</p>
+
+          <div class="mb-5">
+            <label class="block text-xs font-black text-gray-700 mb-2 uppercase tracking-wider">{{ 'destination.selectRating' | transloco }}</label>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button *ngFor="let s of [1, 2, 3, 4, 5]" type="button" (click)="setRating(s)"
+                (mouseenter)="hoverRating = s" (mouseleave)="hoverRating = 0"
+                class="p-1 transition-transform hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1B6FA8] rounded-lg cursor-pointer"
+                [attr.aria-label]="s + ' ' + ('destination.reviewsCount' | transloco: { count: s })">
+                <svg class="w-9 h-9 transition-colors" [class.text-yellow-400]="(hoverRating || userRating) >= s"
+                  [class.text-gray-300]="(hoverRating || userRating) < s" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </button>
+              <span class="text-sm font-black ms-2 px-3 py-1 rounded-full border"
+                [ngClass]="userRating > 0 ? 'text-amber-700 bg-amber-100 border-amber-200' : 'text-gray-500 bg-white border-gray-200'">
+                {{ userRating > 0 ? ('destination.rate' | transloco: { n: userRating, label: ratingLabel }) : ratingLabel }}
+              </span>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-xs font-black text-gray-700 mb-2 uppercase tracking-wider">{{ 'destination.yourComment' | transloco }}</label>
+            <textarea [(ngModel)]="userComment" rows="3"
+              [placeholder]="'destination.commentPlaceholder' | transloco"
+              class="w-full p-4 bg-white border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-[#1B6FA8]/40 focus:border-[#1B6FA8] outline-none transition-all shadow-xs"></textarea>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <button (click)="submitReview()" [disabled]="!canSubmitReview"
+              class="w-full sm:w-auto px-7 py-3 bg-[#1B6FA8] hover:bg-[#155a8a] text-white font-extrabold rounded-2xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg *ngIf="isSubmittingReview" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <span>{{ (hasUserReviewed ? 'destination.updateReview' : 'destination.submitReview') | transloco }}</span>
+            </button>
+
+            <span *ngIf="!authService.isAuthenticated()"
+              class="text-xs text-amber-800 font-bold bg-amber-100 px-3.5 py-2 rounded-xl border border-amber-200">
+              {{ 'destination.loginToReview' | transloco }}
+            </span>
+          </div>
+
+          <div *ngIf="reviewMessage"
+            class="mt-4 p-3.5 rounded-2xl text-xs font-extrabold flex items-center gap-2 shadow-xs"
+            [ngClass]="reviewMessageType === 'success' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-red-100 text-red-900 border border-red-300'">
+            <span>{{ reviewMessageType === 'success' ? '✅' : '⚠️' }}</span>
+            <span>{{ reviewMessage }}</span>
+          </div>
+        </div>
+
+        <!-- REVIEWS LIST -->
+        <div *ngIf="reviewStats.avisList && reviewStats.avisList.length > 0" class="space-y-4">
+          <div *ngFor="let r of reviewStats.avisList"
+            class="bg-gray-50/70 border border-gray-100 rounded-2xl p-5 shadow-xs transition-all hover:bg-white hover:shadow-sm">
+            <div class="flex items-center gap-3 mb-3">
+              <div
+                class="w-11 h-11 rounded-2xl bg-[#1B6FA8] text-white font-black text-sm flex items-center justify-center shadow-xs shrink-0">
+                {{ r.authorAvatar }}</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="font-extrabold text-gray-900 text-sm truncate">{{ r.authorName }}</span>
+                  <span *ngIf="r.isMine"
+                    class="text-[10px] bg-blue-100 text-blue-800 font-black px-2.5 py-0.5 rounded-full border border-blue-200">{{ 'destination.yourReview' | transloco }}</span>
+                </div>
+                <div class="text-xs text-gray-400 font-medium">{{ formatDate(r.dateCreation) }}</div>
+              </div>
+              <div class="flex gap-0.5">
+                <svg *ngFor="let i of renderStars(5)" class="w-4 h-4" [class.text-yellow-400]="isFilled(i, r.note)"
+                  [class.text-gray-300]="!isFilled(i, r.note)" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </div>
+            </div>
+            <p *ngIf="r.commentaire" class="text-sm text-gray-700 leading-relaxed whitespace-pre-line ps-1">{{
+              r.commentaire }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="!reviewStats.avisList || reviewStats.avisList.length === 0"
+          class="text-center py-8 bg-gray-50/60 rounded-3xl border border-dashed border-gray-200">
+          <p class="text-sm font-extrabold text-gray-700 mb-1">{{ 'destination.noReviewsYet' | transloco }}</p>
+          <p class="text-xs text-gray-400">{{ 'destination.beFirstReviewer' | transloco: { name: destination?.name } }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="lg:w-[30%] space-y-6">
+      <div class="sticky top-24 space-y-5">
+        <!-- Actions -->
+        <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-xs space-y-3">
+          <button
+            class="w-full bg-[#1B6FA8] hover:bg-[#155a8a] text-white font-extrabold py-3.5 px-6 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            {{ 'destination.addToItinerary' | transloco }}
+          </button>
+          <button (click)="openGpsDirections()"
+            class="w-full border-2 border-[#1B6FA8] text-[#1B6FA8] hover:bg-[#1B6FA8]/10 font-extrabold py-3.5 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            {{ 'destination.gpsDirections' | transloco }}
+          </button>
+        </div>
+
+        <!-- Weather -->
+        <div class="bg-gradient-to-br from-[#1B6FA8] via-[#145b8c] to-[#0c3e61] rounded-3xl p-6 text-white shadow-md">
+          <h3 class="font-extrabold mb-3 flex items-center gap-2 text-sm">
+            <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+            </svg>
+            {{ 'destination.weatherTitle' | transloco: { region: destination?.region } }}
+          </h3>
+
+          <div *ngIf="isLoadingWeather" class="flex items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          </div>
+
+          <div *ngIf="!isLoadingWeather" class="divide-y divide-white/10">
+            <div *ngFor="let f of forecast" class="py-2.5 first:pt-1 last:pb-1"
+              [ngClass]="{'bg-white/10 rounded-xl px-3 -mx-3': f.isToday}">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <div class="text-white/90 font-bold text-xs">{{ f.isToday ? ('destination.today' | transloco) : f.day }}</div>
+                  <div class="text-white/70 text-[10px] leading-tight">{{ f.date }}</div>
+                </div>
+                <svg *ngIf="f.icon === 'Sun'" class="w-5 h-5 text-yellow-300 mx-2" fill="currentColor"
+                  viewBox="0 0 20 20">
+                  <title>{{ f.description }}</title>
+                  <path
+                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
+                </svg>
+                <svg *ngIf="f.icon === 'Cloud'" class="w-5 h-5 text-white/80 mx-2" fill="currentColor"
+                  viewBox="0 0 20 20">
+                  <title>{{ f.description }}</title>
+                  <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+                </svg>
+                <svg *ngIf="f.icon === 'CloudRain'" class="w-5 h-5 text-blue-300 mx-2" fill="currentColor"
+                  viewBox="0 0 20 20">
+                  <title>{{ f.description }}</title>
+                  <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+                </svg>
+                <svg *ngIf="f.icon === 'CloudSnow'" class="w-5 h-5 text-blue-200 mx-2" fill="currentColor"
+                  viewBox="0 0 20 20">
+                  <title>{{ f.description }}</title>
+                  <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+                </svg>
+                <div class="text-end">
+                  <span class="font-black text-sm">{{ f.tempMax }}°</span>
+                  <span class="text-white/60 text-xs"> / {{ f.tempMin }}°</span>
+                </div>
+              </div>
+              <div *ngIf="f.windSpeed || f.rainChance"
+                class="flex items-center gap-3 text-[10px] text-white/70 ps-0.5 mt-1">
+                <div *ngIf="f.windSpeed" class="flex items-center gap-1">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 18.5h6.5c1.66 0 3-1.34 3-3s-1.34-3-3-3H9m0 0v-3m0 3h-3M9 9.5h6.5c1.66 0 3-1.34 3-3s-1.34-3-3-3H9" />
+                  </svg>
+                  <span>{{ f.windSpeed }} {{ 'destination.windSpeed' | transloco }}</span>
+                </div>
+                <div *ngIf="f.rainChance" class="flex items-center gap-1">
+                  <span>{{ 'destination.rainChance' | transloco: { n: f.rainChance } }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map -->
+        <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-xs">
+          <h3 class="font-extrabold text-gray-900 mb-3 text-sm flex items-center gap-2">
+            <svg class="w-4 h-4 text-[#D97D45]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <polygon points="3 11 22 2 13 21 11 13 3 11" />
+            </svg>
+            {{ 'destination.interactiveMap' | transloco }}
+          </h3>
+          <div class="rounded-2xl overflow-hidden border border-gray-200 shadow-inner">
+            <app-mini-map-picker [lat]="destination?.latitude ?? null" [lng]="destination?.longitude ?? null"
+              [mapHeight]="260"></app-mini-map-picker>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- LIGHTBOX (unchanged) -->
+  <div *ngIf="showLightbox"
+    class="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+    (click)="closeLightbox()">
+    <button (click)="closeLightbox()"
+      class="absolute top-6 end-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all cursor-pointer z-50"
+      [attr.aria-label]="'destination.close' | transloco">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+    <span
+      class="absolute top-6 start-6 text-white/90 text-sm font-extrabold bg-white/10 px-4 py-2 rounded-full border border-white/20">
+      {{ 'destination.photoXofY' | transloco: { n: lightboxIndex + 1, total: photos.length } }}
+    </span>
+    <button *ngIf="photos.length > 1" (click)="prevLightboxPhoto($event)"
+      class="absolute start-6 top-1/2 -translate-y-1/2 p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all cursor-pointer z-50 rtl:rotate-180"
+      [attr.aria-label]="'destination.close' | transloco">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+    <div class="max-w-5xl max-h-[80vh] flex flex-col items-center justify-center p-2"
+      (click)="$event.stopPropagation()">
+      <img [src]="photos[lightboxIndex]?.url" [alt]="photos[lightboxIndex]?.alt"
+        class="max-w-full max-h-[72vh] object-contain rounded-2xl shadow-2xl" />
+      <p class="text-white/80 text-sm mt-3 font-semibold">{{ photos[lightboxIndex]?.alt }}</p>
+    </div>
+    <button *ngIf="photos.length > 1" (click)="nextLightboxPhoto($event)"
+      class="absolute end-6 top-1/2 -translate-y-1/2 p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all cursor-pointer z-50 rtl:rotate-180"
+      [attr.aria-label]="'destination.close' | transloco">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    </button>
+    <div *ngIf="photos.length > 1"
+      class="absolute bottom-6 start-1/2 -translate-x-1/2 flex gap-2 max-w-xl overflow-x-auto p-2 bg-black/40 rounded-2xl border border-white/10"
+      (click)="$event.stopPropagation()">
+      <button *ngFor="let p of photos; let i = index" (click)="lightboxIndex = i" [class.ring-2]="lightboxIndex === i"
+        [class.ring-white]="lightboxIndex === i"
+        class="w-14 h-10 rounded-xl overflow-hidden shrink-0 opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
+        <img [src]="p.url" [alt]="p.alt" class="w-full h-full object-cover" />
+      </button>
+    </div>
+  </div>
+
+</div>

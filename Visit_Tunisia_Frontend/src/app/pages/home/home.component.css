@@ -1,0 +1,19 @@
+/* Accessibility: pause video for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  video {
+    animation-play-state: paused !important;
+    /* Replace video with a static poster */
+    display: none;
+  }
+  
+  /* Show a fallback static image */
+  section.hero-with-video::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('https://images.unsplash.com/photo-1565711561500-49678a10a63f?w=1920&h=1080&fit=crop&auto=format');
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+  }
+}

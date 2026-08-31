@@ -1,0 +1,107 @@
+<div class="max-w-7xl mx-auto px-8 pt-28 pb-16 min-h-screen">
+
+  <!-- Header -->
+  <div class="mb-2">
+    <span class="text-sm font-semibold text-[#1B6FA8] tracking-wide uppercase">{{ 'events.breadcrumbCurrent' | transloco }}</span>
+  </div>
+  <div class="flex items-end justify-between mb-8 flex-wrap gap-2">
+    <h1 class="text-3xl font-bold text-gray-900">{{ 'events.title' | transloco }}</h1>
+    <p class="text-sm text-gray-500 hidden md:block">
+      {{ filtered.length }} {{ filtered.length > 1 ? ('events.plural' | transloco) : ('events.singular' | transloco) }}
+    </p>
+  </div>
+
+  <!-- Genre Filter Pills -->
+  <div class="flex gap-2 mb-10 overflow-x-auto pb-1 -mx-1 px-1">
+    <button
+      *ngFor="let f of filters"
+      (click)="setFilter(f)"
+      [class.bg-[#1B6FA8]]="activeFilter === f"
+      [class.text-white]="activeFilter === f"
+      [class.shadow-md]="activeFilter === f"
+      [class.bg-white]="activeFilter !== f"
+      [class.text-gray-700]="activeFilter !== f"
+      [class.border-gray-200]="activeFilter !== f"
+      class="shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition-all cursor-pointer hover:shadow-sm">
+      {{ filterLabel(f) }}
+    </button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="flex items-center justify-center py-24">
+    <div class="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-[#1B6FA8]"></div>
+  </div>
+
+  <!-- Event Cards Grid — same design as home "Événements à venir" -->
+  <div *ngIf="!isLoading && filtered.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div
+      *ngFor="let ev of filtered"
+      (click)="openEvent(ev.id)"
+      class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-2 cursor-pointer group border border-gray-100">
+
+      <!-- Image -->
+      <div class="relative h-56 overflow-hidden bg-gray-100">
+        <img
+          [src]="ev.photo"
+          [alt]="ev.title"
+          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <!-- Category badge -->
+        <span
+          class="absolute top-3 start-3 text-[11px] font-bold px-3 py-1 rounded-full text-white"
+          [style.background]="ev.categoryColor">
+          {{ genreLabel(ev.category) }}
+        </span>
+        <!-- Price badge -->
+        <span class="absolute top-3 end-3 text-[11px] font-bold px-3 py-1 rounded-full bg-white/90 text-gray-900 shadow-sm">
+          {{ ev.price }}
+        </span>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6">
+        <h3 class="font-bold text-gray-900 mb-3 text-lg group-hover:text-[#1B6FA8] transition-colors leading-snug">
+          {{ ev.title }}
+        </h3>
+
+        <!-- Date -->
+        <div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <span class="font-medium">{{ ev.dateLabel }}</span>
+        </div>
+
+        <!-- Location -->
+        <div class="flex items-center gap-2 text-sm text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          {{ ev.location }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filtered.length === 0" class="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/>
+    </svg>
+    <p class="text-gray-700 font-bold text-lg mb-1">{{ 'events.empty' | transloco }}</p>
+    <p class="text-sm text-gray-400 max-w-xs mx-auto mb-5">
+      {{ 'events.emptyHint' | transloco }} <strong>{{ filterLabel(activeFilter) }}</strong>.
+    </p>
+    <button
+      (click)="setFilter('Tous')"
+      class="px-5 py-2 bg-[#1B6FA8] text-white text-sm font-bold rounded-xl hover:bg-[#155a8a] transition cursor-pointer">
+      {{ 'events.title' | transloco }}
+    </button>
+  </div>
+
+</div>

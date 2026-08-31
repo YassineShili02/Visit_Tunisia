@@ -1,0 +1,9 @@
+target/
+.idea/
+*.log
+.env
+uploads/
+scraper/output/
+.git/
+.vscode/
+HELP.md

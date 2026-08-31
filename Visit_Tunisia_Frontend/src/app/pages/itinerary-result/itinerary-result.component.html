@@ -1,0 +1,358 @@
+<div class="min-h-screen bg-[#faf8f5]">
+
+  <!-- ─── Header page ─────────────────────────────────────────── -->
+  <div class="bg-white border-b border-gray-100 shadow-sm pt-[68px]">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-gray-500">
+        <button (click)="nav.navigate('home')" class="hover:text-[#1B6FA8] transition">{{ 'nav.home' | transloco }}</button>
+        <span class="text-gray-300">/</span>
+        <button (click)="nav.navigate('itinerary-form')" class="hover:text-[#1B6FA8] transition">{{ 'nav.itinerary' | transloco }}</button>
+        <span class="text-gray-300">/</span>
+        <span class="text-gray-900 font-medium">{{ 'itineraryResult.breadcrumbResult' | transloco }}</span>
+      </nav>
+      <!-- Actions -->
+      <div *ngIf="itinerary && days.length > 0" class="flex items-center gap-2">
+        <button *ngIf="isLoggedIn"
+                (click)="saveItinerary()"
+                [disabled]="isSaving || isSaved"
+                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border text-sm font-medium transition"
+                [ngClass]="isSaved
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700 cursor-default'
+                  : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50'">
+          <svg *ngIf="!isSaving && !isSaved" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+          </svg>
+          <svg *ngIf="isSaved" class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <svg *ngIf="isSaving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
+            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" class="opacity-75"/>
+          </svg>
+          {{ (isSaving ? 'itineraryResult.saving' : (isSaved ? 'itineraryResult.savedCheck' : 'itineraryResult.save')) | transloco }}
+        </button>
+
+        <!-- Success Message -->
+        <div *ngIf="saveSuccess" class="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 font-medium animate-fade-in">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span>{{ 'itineraryResult.savedToast' | transloco }}</span>
+          <a routerLink="/my-itineraries" class="underline hover:text-green-800">{{ 'itineraryResult.viewMyItineraries' | transloco }}</a>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="saveError" class="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 font-medium animate-fade-in">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>{{ 'itineraryResult.saveError' | transloco }}</span>
+        </div>
+
+        <button (click)="regenerate()"
+                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1B6FA8] text-white text-sm font-medium hover:bg-[#155a8a] transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          {{ 'itineraryResult.edit' | transloco }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Main content ────────────────────────────────────────── -->
+  <div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Empty state -->
+    <div *ngIf="!itinerary || days.length === 0" class="flex flex-col items-center justify-center py-32 text-center">
+      <div class="w-20 h-20 rounded-2xl bg-[#1B6FA8]/8 flex items-center justify-center mb-5">
+        <svg class="w-10 h-10 text-[#1B6FA8]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-bold text-gray-800 mb-2">{{ 'itineraryResult.emptyTitle' | transloco }}</h2>
+      <p class="text-gray-500 text-sm mb-6 max-w-sm">{{ 'itineraryResult.emptySubtitle' | transloco }}</p>
+      <button (click)="nav.navigate('itinerary-form')"
+              class="px-6 py-2.5 rounded-lg bg-[#1B6FA8] text-white font-semibold text-sm hover:bg-[#155a8a] transition">
+        {{ 'itineraryResult.createMyItinerary' | transloco }}
+      </button>
+    </div>
+
+    <!-- Résultat généré -->
+    <ng-container *ngIf="itinerary && days.length > 0">
+
+      <!-- Titre + sous-titre -->
+      <div class="mb-6 flex items-start justify-between gap-4">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="inline-block bg-[#1B6FA8]/10 text-[#1B6FA8] text-[11px] font-bold px-3 py-1 rounded-full tracking-wide uppercase">{{ 'itineraryResult.aiBadge' | transloco }}</span>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-1">{{ title }}</h1>
+          <p class="text-gray-500 text-sm">{{ 'itineraryResult.subtitle' | transloco: subtitleParams }}</p>
+
+          <!-- Toast notifications -->
+          <div *ngIf="saveSuccess" class="mt-3 inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-2 text-sm">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {{ 'itineraryResult.savedInAccount' | transloco }}
+          </div>
+          <div *ngIf="saveError" class="mt-3 inline-flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-2 text-sm">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            {{ 'itineraryResult.saveErrorRetry' | transloco }}
+          </div>
+        </div>
+
+        <!-- Bouton Sauvegarder visible dès le haut -->
+        <div class="flex-shrink-0 pt-1">
+          <button *ngIf="isLoggedIn"
+                  (click)="saveItinerary()"
+                  [disabled]="isSaving || isSaved"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm shadow transition"
+                  [ngClass]="isSaved
+                    ? 'bg-emerald-600 text-white cursor-default shadow-emerald-200'
+                    : 'bg-[#1B6FA8] hover:bg-[#155a8a] text-white disabled:opacity-60'">
+            <svg *ngIf="!isSaving && !isSaved" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+            </svg>
+            <svg *ngIf="isSaved" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <svg *ngIf="isSaving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" class="opacity-75"/>
+            </svg>
+            {{ (isSaving ? 'itineraryResult.saving' : (isSaved ? 'itineraryResult.savedCheck' : 'itineraryResult.save')) | transloco }}
+          </button>
+          <span *ngIf="!isLoggedIn" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 text-xs font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            {{ 'auth.loginTitle' | transloco }}
+          </span>
+        </div>
+      </div>
+
+      <!-- ─── Statistiques ───────────────────────────────────── -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+        <div class="bg-white rounded-xl border border-gray-100 p-4 text-center shadow-sm">
+          <div class="text-2xl font-bold text-[#1B6FA8]">{{ days.length }}</div>
+          <div class="text-xs text-gray-400 mt-0.5 font-medium">{{ 'itineraryResult.statDays' | transloco }}</div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-4 text-center shadow-sm">
+          <div class="text-2xl font-bold text-[#6B8E4E]">{{ getTotalStops() }}</div>
+          <div class="text-xs text-gray-400 mt-0.5 font-medium">{{ 'itineraryResult.statStops' | transloco }}</div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-4 text-center shadow-sm">
+          <div class="text-2xl font-bold text-[#D97D45]">{{ itinerary!.citiesCount }}</div>
+          <div class="text-xs text-gray-400 mt-0.5 font-medium">{{ 'itineraryResult.statRegions' | transloco }}</div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-4 text-center shadow-sm">
+          <div class="text-xl font-bold" [style.color]="budgetColor">{{ totalBudgetEstimated }} DT</div>
+          <div class="text-[11px] font-semibold mt-0.5" [style.color]="budgetColor">{{ budgetLabel | transloco }}</div>
+          <div class="text-[10px] text-gray-400">{{ 'itineraryResult.budgetEstimated' | transloco }}</div>
+        </div>
+      </div>
+
+      <!-- ─── Deux colonnes : Timeline (50%) + Carte (50%) ─────────────── -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Timeline (1/2) -->
+        <div class="space-y-4">
+
+          <!-- Sélecteur de jours -->
+          <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button *ngFor="let day of days; let i = index"
+                    (click)="selectDay(i)"
+                    class="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all"
+                    [style.border-color]="activeDay === i ? getColor(i) : 'transparent'"
+                    [style.background]="activeDay === i ? getColor(i) : '#f3f4f6'"
+                    [style.color]="activeDay === i ? 'white' : '#6b7280'">
+              {{ 'itineraryResult.dayLabel' | transloco: { n: day.dayNumber } }}
+            </button>
+          </div>
+
+          <!-- Header du jour -->
+          <div *ngIf="days[activeDay]"
+               class="bg-white rounded-xl border border-gray-100 px-4 py-3 flex items-center gap-3 shadow-sm">
+            <span class="w-3 h-3 rounded-full flex-shrink-0" [style.background]="getColor(activeDay)"></span>
+            <div class="flex-1 min-w-0">
+              <h2 class="font-bold text-gray-900 text-sm">{{ regionLabel(days[activeDay].city) }}</h2>
+              <p class="text-xs text-gray-400">{{ formatDateISO(days[activeDay].dateISO) }}</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
+                  style="background: rgba(217,125,69,0.10); color: #D97D45">
+              ~{{ days[activeDay].dayBudget }} DT/pers.
+            </span>
+          </div>
+
+          <!-- Étapes du jour -->
+          <div *ngIf="days[activeDay]" class="space-y-3">
+            <div *ngFor="let stop of days[activeDay].stops; let i = index"
+                 class="border rounded-xl p-3.5 shadow-sm hover:shadow-md transition flex gap-3.5 items-start cursor-pointer"
+                 [ngClass]="[
+                   stop.isOvernight ? 'bg-amber-50/40 border-amber-200/80' : 'bg-white border-gray-100',
+                   highlightedStop === i ? 'ring-2 ring-offset-1' : ''
+                 ]"
+                 [style.ring-color]="highlightedStop === i ? getColor(activeDay) : 'transparent'"
+                 (mouseenter)="onStopHover(i)"
+                 (mouseleave)="onStopHover(-1)"
+                 (click)="onStopClick(i)">
+
+              <!-- Heure & Durée sur place -->
+              <div class="flex-shrink-0 text-center pt-0.5" style="min-width: 52px">
+                <span class="text-xs font-bold block" [ngClass]="stop.isOvernight ? 'text-amber-700' : 'text-[#1B6FA8]'">{{ stop.time }}</span>
+                <span class="text-[10px] text-gray-400 font-medium block mt-0.5">
+                  {{ stop.isOvernight ? ('itineraryResult.overnightDuration' | transloco) : formatVisitDuration(stop.durationMin) }}
+                </span>
+              </div>
+
+              <!-- Ligne verticale séparatrice -->
+              <div class="w-px self-stretch flex-shrink-0" [style.background]="stop.isOvernight ? '#d97706' : getColor(activeDay) + '40'"></div>
+
+              <!-- Photo -->
+              <div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 relative">
+                <img [src]="stop.img" [alt]="stop.name" class="w-full h-full object-cover"
+                     (error)="$any($event.target).src='https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=120'" />
+                <span *ngIf="stop.isOvernight" class="absolute bottom-0 inset-x-0 bg-amber-600/90 text-white text-[9px] font-bold text-center py-0.5">
+                  {{ 'itineraryResult.hotelBadge' | transloco }}
+                </span>
+              </div>
+
+              <!-- Info -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold"
+                        [style.background]="stop.isOvernight ? '#fef3c7' : getColor(activeDay) + '20'"
+                        [style.color]="stop.isOvernight ? '#92400e' : getColor(activeDay)">
+                    {{ categoryLabel(stop.category) }}
+                  </span>
+                  <span *ngIf="stop.estimatedCost > 0" class="ms-auto text-xs font-semibold text-gray-700 flex-shrink-0">
+                    ~{{ stop.estimatedCost }} DT<span *ngIf="stop.isOvernight" class="text-[10px] text-gray-400 font-normal"> {{ 'itineraryResult.perNight' | transloco }}</span>
+                  </span>
+                  <span *ngIf="stop.estimatedCost === 0" class="ms-auto text-xs text-green-600 font-bold flex-shrink-0">{{ 'itineraryResult.free' | transloco }}</span>
+                </div>
+                <div class="font-bold text-gray-900 text-sm leading-snug">{{ stop.name }}</div>
+
+                <!-- Trajet calculé -->
+                <div *ngIf="stop.transitMode" class="inline-flex items-center gap-1.5 mt-1.5 text-[11px] font-medium text-gray-500 bg-gray-50 border border-gray-200/60 rounded-md px-2 py-0.5">
+                  <svg class="w-3 h-3 text-[#1B6FA8] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/>
+                    <circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/>
+                  </svg>
+                  {{ (stop.transitMode === 'walk' ? 'itineraryResult.transitWalk' : 'itineraryResult.transitCar')
+                     | transloco: { min: stop.transitMin, m: stop.transitKm ? (stop.transitKm * 1000) : 0, km: stop.transitKm } }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Aucune étape disponible -->
+            <div *ngIf="days[activeDay].stops.length === 0"
+                 class="bg-gray-50 rounded-xl border border-dashed border-gray-200 py-10 text-center text-gray-400 text-sm">
+              {{ 'itineraryResult.noStopsForRegion' | transloco }}
+            </div>
+          </div>
+
+          <!-- ─── Suggestions d'Upgrade & Montée en Gamme selon le budget ─── -->
+          <div *ngIf="days[activeDay]?.upgrades?.length"
+               class="mt-6 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border border-amber-200/90 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center gap-2.5 mb-3">
+              <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-700 flex items-center justify-center text-base font-bold">✨</span>
+              <div>
+                <h3 class="font-bold text-gray-900 text-sm">{{ 'itineraryResult.upgradesTitle' | transloco }}</h3>
+                <p class="text-xs text-gray-500">{{ 'itineraryResult.upgradesSubtitle' | transloco }}</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+              <div *ngFor="let up of days[activeDay].upgrades"
+                   class="bg-white border border-amber-100/90 rounded-xl p-3.5 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                <div class="flex gap-3 items-start">
+                  <img [src]="up.img" [alt]="up.name"
+                       class="w-14 h-14 rounded-lg object-cover flex-shrink-0 bg-gray-100"
+                       (error)="$any($event.target).src='https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=120'" />
+                  <div class="flex-1 min-w-0">
+                    <span class="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full inline-block mb-1">
+                      {{ 'itineraryResult.' + up.badgeKey | transloco }}
+                    </span>
+                    <div class="font-bold text-gray-900 text-xs truncate">{{ up.name }}</div>
+                    <div class="text-[11px] text-gray-400 mt-0.5 leading-tight">{{ 'itineraryResult.' + up.reasonKey | transloco }}</div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-gray-100">
+                  <div>
+                    <span class="text-xs font-bold text-amber-600">{{ 'itineraryResult.upgradesCost' | transloco: { n: up.costDiff } }}</span>
+                    <span class="text-[10px] text-gray-400 block">{{ 'itineraryResult.upgradesReplaces' | transloco: { name: up.originalName } }}</span>
+                  </div>
+                  <button (click)="applyUpgrade(activeDay, up)"
+                          class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition shadow-sm hover:shadow">
+                    {{ 'itineraryResult.chooseThisOption' | transloco }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carte + Légende (1/2) -->
+        <div>
+          <div class="sticky top-24 space-y-4">
+
+            <!-- Carte -->
+            <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+              <div class="h-[720px]">
+                <app-itinerary-map
+                  [days]="days"
+                  [activeDay]="activeDay"
+                  [highlightedStop]="highlightedStop"
+                  (stopClick)="onStopClick($event)">
+                </app-itinerary-map>
+              </div>
+            </div>
+
+            <!-- Légende -->
+            <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+              <h3 class="text-sm font-bold text-gray-900 mb-3">{{ 'itineraryResult.mapLegend' | transloco }}</h3>
+              <div class="space-y-2">
+                <div *ngFor="let day of days; let i = index"
+                     class="flex items-center gap-2.5 py-1.5 px-2 rounded-lg cursor-pointer transition"
+                     [style.background]="activeDay === i ? getColor(i) + '12' : 'transparent'"
+                     (click)="selectDay(i)">
+                  <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" [style.background]="getColor(i)"></span>
+                  <span class="text-sm text-gray-700 flex-1 font-medium">{{ 'itineraryResult.dayLabel' | transloco: { n: day.dayNumber } }}</span>
+                  <span class="text-xs text-gray-400">{{ regionLabel(day.city) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Budget par jour -->
+            <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+              <h3 class="text-sm font-bold text-gray-900 mb-3">{{ 'itineraryResult.budgetByDay' | transloco }}</h3>
+              <div class="space-y-2">
+                <div *ngFor="let day of days; let i = index" class="flex items-center gap-2">
+                  <span class="text-xs text-gray-500 w-12 flex-shrink-0">{{ 'itineraryResult.dayLabel' | transloco: { n: day.dayNumber } }}</span>
+                  <div class="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                    <div class="h-full rounded-full transition-all"
+                         [style.width]="getDayBudgetPercent(day.dayBudget) + '%'"
+                         [style.background]="getColor(i)"></div>
+                  </div>
+                  <span class="text-xs text-gray-500 w-16 text-end flex-shrink-0">{{ day.dayBudget }} DT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="mt-10 pt-6 border-t border-gray-100 text-center">
+        <button (click)="nav.navigate('itinerary-form')"
+                class="text-sm text-gray-400 hover:text-[#1B6FA8] transition inline-flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          {{ 'itineraryResult.edit' | transloco }}
+        </button>
+      </div>
+
+    </ng-container>
+  </div>
+</div>

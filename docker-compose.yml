@@ -1,0 +1,81 @@
+services:
+  # ============================================================
+  # PostgreSQL + PostGIS (colonnes geography utilisees par l'app)
+  # ============================================================
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: vt_db
+    environment:
+      POSTGRES_DB: visit_tunisia
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"   # hote 5433 pour eviter le conflit avec le postgres local
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d visit_tunisia"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  # ============================================================
+  # Backend Spring Boot (+ python3/scrapers embarques)
+  # ============================================================
+  backend:
+    build: ./Visit_Tunisia_Backend
+    container_name: vt_backend
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: visit_tunisia
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      WEATHER_API_KEY: ${WEATHER_API_KEY}
+    volumes:
+      - uploads:/app/uploads   # persistance des photos uploadees
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/api/destinations"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  # ============================================================
+  # Microservice IA (FastAPI + Gemini)
+  # ============================================================
+  ai:
+    build: ./Visit_Tunisia_AI
+    container_name: vt_ai
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      SPRING_BOOT_URL: http://backend:8082
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  # ============================================================
+  # Frontend Angular servi par Nginx (point d'entree unique)
+  # ============================================================
+  frontend:
+    build: ./Visit_Tunisia_Frontend
+    container_name: vt_frontend
+    depends_on:
+      - ai
+      - backend
+    ports:
+      - "4200:80"
+
+volumes:
+  pgdata:
+  uploads:

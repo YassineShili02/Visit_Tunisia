@@ -1,0 +1,542 @@
+[33m>[39m Building...
+[32m√[39m Building...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m               [2m | [22m  [36m1.59 MB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m             [2m | [22m[36m110.45 kB[39m[2m | [22m
+[32mpolyfills.js[39m       [2m | [22m[2mpolyfills[22m          [2m | [22m [36m90.20 kB[39m[2m | [22m
+[32mchunk-Y5RQAIA6.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.50 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m      [2m | [22m  [1m1.79 MB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mchunk-PNRF2TAC.js[39m  [2m | [22m[2mgouvernorat-mapping[22m[2m | [22m[36m950 bytes[39m[2m | [22m
+
+Application bundle generation complete. [17.580 seconds]
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:7:32:
+[37m      7 │         {{ (profileForm.prenom?.[32mcharAt[37m(0) || '') + (profileForm.nom...
+        ╵                                 [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:7:69:
+[37m      7 │ ...rm.prenom?.charAt(0) || '') + (profileForm.nom?.[32mcharAt[37m(0) || '') }}
+        ╵                                                    [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:50:36:
+[37m      50 │ ...     {{ (profileForm.prenom?.[32mcharAt[37m(0) || '') + (profileForm.no...
+         ╵                                 [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:50:73:
+[37m      50 │ ...m.prenom?.charAt(0) || '') + (profileForm.nom?.[32mcharAt[37m(0) || '') }}
+         ╵                                                   [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:1813:35:
+[37m      1813 │ ...               {{ u.prenom?.[32mcharAt[37m(0) || '' }}{{ u.nom?.charA...
+           ╵                                [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:1813:63:
+[37m      1813 │ ...     {{ u.prenom?.charAt(0) || '' }}{{ u.nom?.[32mcharAt[37m(0) || '' }}
+           ╵                                                  [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:2777:55:
+[37m      2777 │ ...            Galerie Photos ({{ editDraft.photos?.[32mlength[37m || 0 }})
+           ╵                                                     [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:3434:55:
+[37m      3434 │ ...            Galerie Photos ({{ editEvent.photos?.[32mlength[37m || 0 }})
+           ╵                                                     [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/detail/detail.component.html:608:41:
+[37m      608 │ ...[src]="photos[lightboxIndex]?.[32murl[37m" [alt]="photos[lightboxIndex...
+          ╵                                  [32m~~~[0m
+
+  Error occurs in the template of component DetailComponent.
+
+    src/app/pages/detail/detail.component.ts:23:15:
+[37m      23 │   templateUrl: [32m'./detail.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/detail/detail.component.html:608:76:
+[37m      608 │ ...]="photos[lightboxIndex]?.url" [alt]="photos[lightboxIndex]?.[32malt[37m"
+          ╵                                                                 [32m~~~[0m
+
+  Error occurs in the template of component DetailComponent.
+
+    src/app/pages/detail/detail.component.ts:23:15:
+[37m      23 │   templateUrl: [32m'./detail.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/detail/detail.component.html:610:84:
+[37m      610 │ ... text-sm mt-3 font-semibold">{{ photos[lightboxIndex]?.[32malt[37m }}</p>
+          ╵                                                           [32m~~~[0m
+
+  Error occurs in the template of component DetailComponent.
+
+    src/app/pages/detail/detail.component.ts:23:15:
+[37m      23 │   templateUrl: [32m'./detail.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/my-itineraries/my-itineraries.component.html:192:70:
+[37m      192 │ ...               [alt]="getDestinationName(etape.destination?.[32mnom[37m)"
+          ╵                                                                [32m~~~[0m
+
+  Error occurs in the template of component MyItinerariesComponent.
+
+    src/app/pages/my-itineraries/my-itineraries.component.ts:13:15:
+[37m      13 │   templateUrl: [32m'./my-itineraries.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/my-itineraries/my-itineraries.component.html:206:67:
+[37m      206 │ ...                 {{ getDestinationName(etape.destination?.[32mnom[37m) }}
+          ╵                                                              [32m~~~[0m
+
+  Error occurs in the template of component MyItinerariesComponent.
+
+    src/app/pages/my-itineraries/my-itineraries.component.ts:13:15:
+[37m      13 │   templateUrl: [32m'./my-itineraries.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m4200[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m [36m1.59 MB[39m[2m | [22m
+
+Application bundle generation complete. [15.502 seconds]
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:7:32:
+[37m      7 │         {{ (profileForm.prenom?.[32mcharAt[37m(0) || '') + (profileForm.nom...
+        ╵                                 [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:7:69:
+[37m      7 │ ...rm.prenom?.charAt(0) || '') + (profileForm.nom?.[32mcharAt[37m(0) || '') }}
+        ╵                                                    [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:50:36:
+[37m      50 │ ...     {{ (profileForm.prenom?.[32mcharAt[37m(0) || '') + (profileForm.no...
+         ╵                                 [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:50:73:
+[37m      50 │ ...m.prenom?.charAt(0) || '') + (profileForm.nom?.[32mcharAt[37m(0) || '') }}
+         ╵                                                   [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:1813:35:
+[37m      1813 │ ...               {{ u.prenom?.[32mcharAt[37m(0) || '' }}{{ u.nom?.charA...
+           ╵                                [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:1813:63:
+[37m      1813 │ ...     {{ u.prenom?.charAt(0) || '' }}{{ u.nom?.[32mcharAt[37m(0) || '' }}
+           ╵                                                  [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:2777:55:
+[37m      2777 │ ...            Galerie Photos ({{ editDraft.photos?.[32mlength[37m || 0 }})
+           ╵                                                     [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:3434:55:
+[37m      3434 │ ...            Galerie Photos ({{ editEvent.photos?.[32mlength[37m || 0 }})
+           ╵                                                     [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/detail/detail.component.html:608:41:
+[37m      608 │ ...[src]="photos[lightboxIndex]?.[32murl[37m" [alt]="photos[lightboxIndex...
+          ╵                                  [32m~~~[0m
+
+  Error occurs in the template of component DetailComponent.
+
+    src/app/pages/detail/detail.component.ts:23:15:
+[37m      23 │   templateUrl: [32m'./detail.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/detail/detail.component.html:608:76:
+[37m      608 │ ...]="photos[lightboxIndex]?.url" [alt]="photos[lightboxIndex]?.[32malt[37m"
+          ╵                                                                 [32m~~~[0m
+
+  Error occurs in the template of component DetailComponent.
+
+    src/app/pages/detail/detail.component.ts:23:15:
+[37m      23 │   templateUrl: [32m'./detail.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/detail/detail.component.html:610:84:
+[37m      610 │ ... text-sm mt-3 font-semibold">{{ photos[lightboxIndex]?.[32malt[37m }}</p>
+          ╵                                                           [32m~~~[0m
+
+  Error occurs in the template of component DetailComponent.
+
+    src/app/pages/detail/detail.component.ts:23:15:
+[37m      23 │   templateUrl: [32m'./detail.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/my-itineraries/my-itineraries.component.html:192:70:
+[37m      192 │ ...               [alt]="getDestinationName(etape.destination?.[32mnom[37m)"
+          ╵                                                                [32m~~~[0m
+
+  Error occurs in the template of component MyItinerariesComponent.
+
+    src/app/pages/my-itineraries/my-itineraries.component.ts:13:15:
+[37m      13 │   templateUrl: [32m'./my-itineraries.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/my-itineraries/my-itineraries.component.html:206:67:
+[37m      206 │ ...                 {{ getDestinationName(etape.destination?.[32mnom[37m) }}
+          ╵                                                              [32m~~~[0m
+
+  Error occurs in the template of component MyItinerariesComponent.
+
+    src/app/pages/my-itineraries/my-itineraries.component.ts:13:15:
+[37m      13 │   templateUrl: [32m'./my-itineraries.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m [36m1.59 MB[39m[2m | [22m
+
+Application bundle generation complete. [0.724 seconds]
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:7:32:
+[37m      7 │         {{ (profileForm.prenom?.[32mcharAt[37m(0) || '') + (profileForm.nom...
+        ╵                                 [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:7:69:
+[37m      7 │ ...rm.prenom?.charAt(0) || '') + (profileForm.nom?.[32mcharAt[37m(0) || '') }}
+        ╵                                                    [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:50:36:
+[37m      50 │ ...     {{ (profileForm.prenom?.[32mcharAt[37m(0) || '') + (profileForm.no...
+         ╵                                 [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/account/account.component.html:50:73:
+[37m      50 │ ...m.prenom?.charAt(0) || '') + (profileForm.nom?.[32mcharAt[37m(0) || '') }}
+         ╵                                                   [32m~~~~~~[0m
+
+  Error occurs in the template of component AccountComponent.
+
+    src/app/pages/account/account.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./account.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:1813:35:
+[37m      1813 │ ...               {{ u.prenom?.[32mcharAt[37m(0) || '' }}{{ u.nom?.charA...
+           ╵                                [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:1813:63:
+[37m      1813 │ ...     {{ u.prenom?.charAt(0) || '' }}{{ u.nom?.[32mcharAt[37m(0) || '' }}
+           ╵                                                  [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:2777:55:
+[37m      2777 │ ...            Galerie Photos ({{ editDraft.photos?.[32mlength[37m || 0 }})
+           ╵                                                     [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/admin/admin.component.html:3434:55:
+[37m      3434 │ ...            Galerie Photos ({{ editEvent.photos?.[32mlength[37m || 0 }})
+           ╵                                                     [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminComponent.
+
+    src/app/pages/admin/admin.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./admin.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/detail/detail.component.html:608:41:
+[37m      608 │ ...[src]="photos[lightboxIndex]?.[32murl[37m" [alt]="photos[lightboxIndex...
+          ╵                                  [32m~~~[0m
+
+  Error occurs in the template of component DetailComponent.
+
+    src/app/pages/detail/detail.component.ts:23:15:
+[37m      23 │   templateUrl: [32m'./detail.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/detail/detail.component.html:608:76:
+[37m      608 │ ...]="photos[lightboxIndex]?.url" [alt]="photos[lightboxIndex]?.[32malt[37m"
+          ╵                                                                 [32m~~~[0m
+
+  Error occurs in the template of component DetailComponent.
+
+    src/app/pages/detail/detail.component.ts:23:15:
+[37m      23 │   templateUrl: [32m'./detail.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/detail/detail.component.html:610:84:
+[37m      610 │ ... text-sm mt-3 font-semibold">{{ photos[lightboxIndex]?.[32malt[37m }}</p>
+          ╵                                                           [32m~~~[0m
+
+  Error occurs in the template of component DetailComponent.
+
+    src/app/pages/detail/detail.component.ts:23:15:
+[37m      23 │   templateUrl: [32m'./detail.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/my-itineraries/my-itineraries.component.html:192:70:
+[37m      192 │ ...               [alt]="getDestinationName(etape.destination?.[32mnom[37m)"
+          ╵                                                                [32m~~~[0m
+
+  Error occurs in the template of component MyItinerariesComponent.
+
+    src/app/pages/my-itineraries/my-itineraries.component.ts:13:15:
+[37m      13 │   templateUrl: [32m'./my-itineraries.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/my-itineraries/my-itineraries.component.html:206:67:
+[37m      206 │ ...                 {{ getDestinationName(etape.destination?.[32mnom[37m) }}
+          ╵                                                              [32m~~~[0m
+
+  Error occurs in the template of component MyItinerariesComponent.
+
+    src/app/pages/my-itineraries/my-itineraries.component.ts:13:15:
+[37m      13 │   templateUrl: [32m'./my-itineraries.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+Page reload sent to client(s).
