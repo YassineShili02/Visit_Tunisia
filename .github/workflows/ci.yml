@@ -106,7 +106,7 @@ jobs:
       - name: Verifier que l'app importe (GEMINI_API_KEY factice)
         env:
           GEMINI_API_KEY: cle_factice_pour_test_ci
-        run: python -c "from main import app; print('AI: import OK')"
+        run: python -c 'from main import app; print("AI import OK")'
 
   # ============================================================
   # 4. IMAGES DOCKER : construction + push GHCR (optionnel)
