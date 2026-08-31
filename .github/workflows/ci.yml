@@ -126,28 +126,82 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Construire et pousser les images vers Docker Hub
+      # Construire les 3 images avec les tags locaux (pas encore pousses)
+      - name: Construire les images
+        run: |
+          SHA="${{ github.sha }}"
+          docker build -t "vt-backend:smoke" Visit_Tunisia_Backend
+          docker build -t "vt-frontend:smoke" Visit_Tunisia_Frontend
+          docker build -t "vt-ai:smoke" Visit_Tunisia_AI
+
+      # ============================================================
+      # SMOKE TEST : lancer les 4 conteneurs et verifier les reponses
+      # ============================================================
+      - name: Smoke test — demarrer les conteneurs
+        run: |
+          docker network create vt-smoke
+          # BDD PostGIS
+          docker run -d --network vt-smoke --name vt-db \
+            -e POSTGRES_DB=visit_tunisia -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin \
+            postgis/postgis:16-3.4
+          # Backend
+          docker run -d --network vt-smoke --name vt-backend \
+            -e DB_HOST=vt-db -e DB_PORT=5432 -e DB_NAME=visit_tunisia \
+            -e DB_USER=postgres -e DB_PASSWORD=admin \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
+            -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
+            -e WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }} \
+            vt-backend:smoke
+          # IA
+          docker run -d --network vt-smoke --name vt-ai \
+            -e GEMINI_API_KEY=cle_factice_pour_smoke \
+            -e SPRING_BOOT_URL=http://vt-backend:8082 \
+            vt-ai:smoke
+          # Frontend (nginx, proxy vers backend + ai)
+          docker run -d --network vt-smoke -p 4200:80 --name vt-frontend \
+            vt-frontend:smoke
+
+      - name: Smoke test — attendre la BDD et le backend
+        run: |
+          for i in $(seq 1 30); do
+            if docker exec vt-db pg_isready -U postgres >/dev/null 2>&1; then
+              echo "PostGIS pret apres ${i}x2s"; break
+            fi
+            sleep 2
+          done
+          echo "--- Logs backend (atterrissage) ---"
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8082/api/destinations 2>/dev/null || true)
+            if [ "$code" = "200" ]; then echo "Backend repond (HTTP 200) apres ${i}x3s"; break; fi
+            sleep 3
+          done
+          echo "HTTP final = $code"
+
+      - name: Smoke test — verifier les reponses
+        run: |
+          echo "1) Frontend :"
+          curl -sf http://localhost:4200/ -o /dev/null && echo "   OK (page HTML)"
+          echo "2) Backend destinations :"
+          curl -sf http://localhost:4200/api/destinations | head -c 200 && echo "" && echo "   OK"
+          echo "3) Backend events :"
+          curl -sf http://localhost:4200/api/events -o /dev/null && echo "   OK"
+          echo "4) Backend via proxy nginx :"
+          curl -sf http://localhost:4200/api/weather/forecast?lat=36.81\&lon=10.17 -o /dev/null && echo "   OK (meteo)"
+
+      - name: Smoke test — nettoyage
+        if: always()
+        run: |
+          docker rm -f vt-frontend vt-ai vt-backend vt-db >/dev/null 2>&1 || true
+          docker network rm vt-smoke >/dev/null 2>&1 || true
+
+      # Le push se fait UNIQUEMENT si le smoke test a reussi
+      - name: Pusher les images vers Docker Hub
         if: env.PUSH_IMAGES == 'true'
         run: |
           SHA="${{ github.sha }}"
-          # Backend (multi-stage: compile + runtime avec python/scrapers)
-          docker build -t "yassineshili/visit_tunisia_backend:latest" \
-                       -t "yassineshili/visit_tunisia_backend:$SHA" \
-                       Visit_Tunisia_Backend
-          # Frontend (multi-stage: node -> nginx)
-          docker build -t "yassineshili/visit_tunisia_frontend:latest" \
-                       -t "yassineshili/visit_tunisia_frontend:$SHA" \
-                       Visit_Tunisia_Frontend
-          # AI (FastAPI)
-          docker build -t "yassineshili/visit_tunisia_ai:latest" \
-                       -t "yassineshili/visit_tunisia_ai:$SHA" \
-                       Visit_Tunisia_AI
-          docker push "yassineshili/visit_tunisia_backend:latest"
-          docker push "yassineshili/visit_tunisia_backend:$SHA"
-          docker push "yassineshili/visit_tunisia_frontend:latest"
-          docker push "yassineshili/visit_tunisia_frontend:$SHA"
-          docker push "yassineshili/visit_tunisia_ai:latest"
-          docker push "yassineshili/visit_tunisia_ai:$SHA"
-      - name: Verifier que le build passe (sans push)
-        if: env.PUSH_IMAGES != 'true'
-        run: docker compose build
+          for SVC in backend frontend ai; do
+            docker tag "vt-$SVC:smoke" "yassineshili/visit_tunisia_$SVC:latest"
+            docker tag "vt-$SVC:smoke" "yassineshili/visit_tunisia_$SVC:$SHA"
+            docker push --all-tags "yassineshili/visit_tunisia_$SVC"
+          done
